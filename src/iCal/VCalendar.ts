@@ -63,6 +63,9 @@ export default class VCalendar {
 
         this._footer.forEach(footer => addICSLine(lines, footer));
 
-        return lines.join('\r\n');
+        const result = lines.join('\r\n');
+
+        console.log(result);
+        return result;
     }
 }
