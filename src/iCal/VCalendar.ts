@@ -1,15 +1,15 @@
-import VEvent from './VEvent';
+import VEvent, { iCalEventProps, iCalEventAlarm } from './VEvent';
 
 
-function addICSLine(list, icsObject) {
+export function addICSLine(list, icsObject) {
     if (typeof icsObject.key !== 'string' || icsObject.key.length <= 0)
         return null;
 
     if (typeof icsObject.value !== 'string' || icsObject.value.length <= 0)
         return null;
 
-    const parsedKey = icsObject.key.replace(/[\\;,\n]/g, (match) => (match === '\n' ? '\\n' : ('\\' + match)));
-    const parsedValue = icsObject.value.replace(/[\\;,\n]/g, (match) => (match === '\n' ? '\\n' : ('\\' + match)));
+    const parsedKey = icsObject.key.replace(/[\\,\n]/g, (match) => (match === '\n' ? '\\n' : ('\\' + match)));
+    const parsedValue = icsObject.value.replace(/[\\,\n]/g, (match) => (match === '\n' ? '\\n' : ('\\' + match)));
 
     list.push(parsedKey + ':' + parsedValue);
 }
@@ -17,55 +17,56 @@ function addICSLine(list, icsObject) {
 
 export default class VCalendar {
 
-    private _headers: { key: string; value: string }[];
-    private _events;
-    private _footer;
+    private _events: VEvent[];
+
+    private _name: string;
+    private _scale: string;
+    private _version: string;
+    private _method: string;
+    private _prodid: string;
+
 
     public get name(): string {
-        const entry = this._headers.find(entry => entry.key === 'X-WR-CALNAME');
-        return (entry && entry.value) || 'unknown';
+        return this._name;
     }
 
-    constructor(calName, calScale, version, method, prodId) {
-        this._headers = [
-            { key: 'BEGIN', value: 'VCALENDAR' },
-            { key: 'CALSCALE', value: calScale || 'GREGORIAN' },
-            { key: 'VERSION', value: version || '2.0' },
-            { key: 'X-WR-CALNAME', value: calName },
-            { key: 'METHOD', value: method || 'PUBLISH' },
-            { key: 'PRODID', value: prodId }
-        ];
 
+    public constructor(calName: string, prodId: string, calScale?: string, version?: string, method?: string) {
         this._events = [];
 
-        this._footer = [
-            { key: 'END', value: 'VCALENDAR' }
+        this._name = calName;
+        this._prodid = prodId;
+        this._scale = calScale || 'GREGORIAN';
+        this._version = version || '2.0';
+        this._method = method || 'PUBLISH';
+    }
+
+
+    public addEvent(event: iCalEventProps, alarms: iCalEventAlarm[] = []) {
+        var addedEvent = new VEvent(event);
+
+        alarms.forEach(alarm => addedEvent.addAlarm(alarm));
+
+        this._events.push(addedEvent);
+        return addedEvent;
+    }
+
+
+    public toICSString() {
+        var lines: string[] = [
+            'BEGIN:VCALENDAR',
+            'CALSCALE:' + this._scale,
+            'VERSION:' + this._version,
+            'X-WR-CALNAME:' + this._name,
+            'METHOD:' + this._method,
+            'PRODID:' + this._prodid,
         ];
-    }
 
-    addEvent(id, startDate, endDate, isAllDay, name, description, location, visibility, category, orgnizer, attendees, createdDate, lastModifiedDate) {
-        var event = new VEvent(id, startDate, endDate, isAllDay, name, description, location, visibility, category, orgnizer, attendees, createdDate, lastModifiedDate);
-        this._events.push(event);
-        return event;
-    }
+        this._events.forEach(event => lines.push(event.toICSStrings()));
 
-    toICSString() {
-        var lines = [];
+        lines.push('END:VCALENDAR');
 
-        this._headers.forEach(header => addICSLine(lines, header));
-
-        this._events.forEach(event => {
-            event._headers.forEach(header => addICSLine(lines, header));
-            event._props.forEach(prop => addICSLine(lines, prop));
-            event._alarms.forEach(alarm => addICSLine(lines, alarm));
-            event._footer.forEach(footer => addICSLine(lines, footer));
-        });
-
-        this._footer.forEach(footer => addICSLine(lines, footer));
-
-        const result = lines.join('\r\n');
-
-        console.log(result);
-        return result;
+        console.log(lines.join('\n'));
+        return lines.join('\r\n');
     }
 }

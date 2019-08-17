@@ -1,8 +1,32 @@
-export interface iCalAttendee {
+import { addICSLine } from "./VCalendar";
+
+export interface iCalPersonObject {
     name: string;
     email: string;
 }
 
+export interface iCalEventProps {
+    id: string;
+    startDate: Date;
+    endDate: Date;
+    isAllDay: boolean;
+    name: string;
+    description?: string;
+    location?: string;
+    visibility?: string;
+    category?: string;
+    orgnizer: iCalPersonObject;
+    attendees: iCalPersonObject[];
+    createdDate: Date;
+    lastModifiedDate: Date;
+}
+
+export interface iCalEventAlarm {
+    id: string;
+    trigger: string;
+    description: string;
+    action?: string;
+}
 
 
 function _formatDate(date, isAllDay) {
@@ -15,55 +39,68 @@ function _formatDate(date, isAllDay) {
     return isAllDay ? icsDateString.substring(0, icsDateString.indexOf('T')) : icsDateString;
 }
 
+
 export default class VEvent {
 
-    private _headers: { key: string; value: string }[];
-    private _props: { key: string; value: string }[];
-    private _alarms: { key: string; value: string }[][];
-    private _footer: { key: string; value: string }[];
+    private _props: iCalEventProps;
 
-    constructor(id, startDate, endDate, isAllDay, name, description, location, visibility, category, orgnizer, attendees: iCalAttendee[], createdDate, lastModifiedDate) {
-        this._headers = [
-            { key: 'BEGIN', value: 'VEVENT' }
-        ];
-        this._props = [
-            { key: 'TRANSP', value: 'TRANSPARENT' },
-            { key: 'UID', value: id },
-            { key: 'DTSTAMP', value: _formatDate(startDate, false) },
-            { key: 'DTSTART' + (isAllDay ? ';VALUE=DATE' : ''), value: _formatDate(startDate, isAllDay) },
-            { key: 'DTEND' + (isAllDay ? ';VALUE=DATE' : ''), value: _formatDate(endDate, isAllDay) },
-            { key: 'SUMMARY', value: name },
-            { key: 'DESCRIPTION', value: description },
-            { key: 'LOCATION', value: location },
-            { key: 'CLASS', value: visibility || 'PUBLIC' },
-            { key: 'CATEGORIES', value: category },
-            { key: 'STATUS', value: 'CONFIRMED' },
-            { key: 'SEQUENCE', value: 0 },
-            { key: 'CREATED', value: _formatDate(createdDate, false) },
-            { key: 'LAST-MODIFIED', value: _formatDate(lastModifiedDate, false) },
-            { key: 'ORGANIZER;CN=' + orgnizer.name, value: orgnizer.email }
-        ];
+    private _alarms: iCalEventAlarm[];
 
-        attendees.forEach(attendee => {
-            this._props.push({ key: 'ATTENDEE;CN=' + attendee.name, value: attendee.email });
-        });
 
+    public constructor(props: iCalEventProps) {
+        this._props = props;
         this._alarms = [];
-        this._footer = [
-            { key: 'END', value: 'VEVENT' }
-        ];
     }
 
-    addAlarm(id, trigger, description, action) {
-        var alarm = [
-            { key: 'BEGIN', value: 'VALARM' },
-            { key: 'X-WR-ALARMUID', value: id },
-            { key: 'UID', value: id },
-            { key: 'TRIGGER', value: trigger },
-            { key: 'DESCRIPTION', value: description },
-            { key: 'ACTION', value: action || 'DISPLAY' },
-            { key: 'END', value: 'VALARM' }
-        ];
+
+    public addAlarm(alarm:iCalEventAlarm):void {
         this._alarms.push(alarm);
+    }
+
+    
+    public toICSStrings(): string {
+        const isAllDay = this._props.isAllDay;
+
+        const lines: string[] = [
+            'TRANSP:TRANSPARENT',
+            'UID:' + this._props.id,
+            'DTSTAMP:' + _formatDate(this._props.startDate, false),
+            'DTSTART' + (isAllDay ? ';VALUE=DATE' : '') + ':' + _formatDate(this._props.startDate, isAllDay),
+            'DTEND' + (isAllDay ? ';VALUE=DATE' : '') + ':' + _formatDate(this._props.endDate, isAllDay),
+            'SUMMARY:' + this._props.name,
+            'CLASS:' + (this._props.visibility || 'PUBLIC'),
+            'STATUS:CONFIRMED',
+            'SEQUENCE:0',
+            'CREATED:' + _formatDate(this._props.createdDate, false),
+            'LAST-MODIFIED:' + _formatDate(this._props.lastModifiedDate, false),
+            `ORGANIZER;CN=${this._props.orgnizer.name}:MAILTO:${this._props.orgnizer.email}`
+        ];
+
+        // optional Entries
+        if (this._props.category)
+            lines.push('CATEGORIES:' + this._props.category);
+        if (this._props.description)
+            lines.push('DESCRIPTION:' + this._props.description);
+        if (this._props.location)
+            lines.push('LOCATION:' + this._props.location);
+
+        this._props.attendees.forEach(attendee => {
+            lines.push(`ATTENDEE;CN=${attendee.name}:MAILTO:${attendee.email}`);
+        });
+
+        this._alarms.forEach(alarm => {
+            lines.push('BEGIN:VALARM');
+            lines.push('X-WR-ALARMUID:' + alarm.id);
+            lines.push('UID:' + alarm.id);
+            lines.push('TRIGGER:' + alarm.trigger);
+            lines.push('DESCRIPTION:' + alarm.description);
+            lines.push('ACTION:' + (alarm.action || 'DISPLAY'));
+            lines.push('END:VALARM');
+        })
+
+        lines.unshift('BEGIN:VEVENT');
+        lines.push('END:VEVENT');
+
+        return lines.join('\r\n');
     }
 }

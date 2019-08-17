@@ -1,10 +1,9 @@
 import express from 'express';
 import VCalendar from './iCal/VCalendar';
-import VEvent from './iCal/VEvent';
 
 const app = express();
 const port = 22222;
-const iCal = new VCalendar('Bommys Kalender', null, null, null, 'Version 1.0-alpha');
+const iCal = new VCalendar('Bommys Kalender', '-//bommynet/pixlcal//NONSGML v1.0-alpha//DE');
 
 let globalCalendarEntryUid = 1;
 
@@ -25,14 +24,18 @@ app.post('/api/calendar/add', (req, res) => {
     const begin = new Date(Number.parseInt(req.query['begin']));
     const end = new Date(Number.parseInt(req.query['begin']));
 
-    const event = iCal.addEvent(
-        uid,
-        begin, end, false,
-        req.query['name'], req.query['description'], null, null, null,
-        { name: 'Thomas', email: 'ja' },
-        [],
-        new Date(), new Date()
-    );
+    const event = iCal.addEvent({
+        id: uid.toString(),
+        startDate: begin,
+        endDate: end,
+        isAllDay: true,
+        name: req.query['name'],
+        description: req.query['description'],
+        orgnizer: { name: 'Thomas', email: 'mail@bommy.net' },
+        attendees: [],
+        createdDate: new Date(),
+        lastModifiedDate: new Date(),
+    });
 
     globalCalendarEntryUid++;
     res.status(200).send(event);
