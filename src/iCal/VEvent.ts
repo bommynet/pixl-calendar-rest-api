@@ -62,6 +62,7 @@ export default class VEvent {
         const isAllDay = this._props.isAllDay;
 
         const lines: string[] = [
+            'BEGIN:VEVENT',
             'TRANSP:TRANSPARENT',
             'UID:' + this._props.id,
             'DTSTAMP:' + _formatDate(this._props.startDate, false),
@@ -98,7 +99,6 @@ export default class VEvent {
             lines.push('END:VALARM');
         })
 
-        lines.unshift('BEGIN:VEVENT');
         lines.push('END:VEVENT');
 
         return lines.join('\r\n');

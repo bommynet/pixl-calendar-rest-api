@@ -7,7 +7,7 @@ const iCal = new VCalendar('Bommys Kalender', '-//bommynet/pixlcal//NONSGML v1.0
 
 let globalCalendarEntryUid = 1;
 
-app.get('/api/calendar/subscribe', (req, res) => {
+app.get('/api/calendar/sync', (req, res) => {
     console.log('Kalender-Sync von', req.ip);
 
     const iCalString = iCal.toICSString();
@@ -17,18 +17,18 @@ app.get('/api/calendar/subscribe', (req, res) => {
     res.send(iCalString);
 });
 
-app.post('/api/calendar/add', (req, res) => {
+app.post('/api/calendar/appointment', (req, res) => {
     console.log('Kalender-Add von', req.ip);
-
+    
     const uid = globalCalendarEntryUid;
-    const begin = new Date(Number.parseInt(req.query['begin']));
-    const end = new Date(Number.parseInt(req.query['begin']));
-
+    const begin = new Date(req.query['begin']);
+    const end = new Date(req.query['end']);
+    
     const event = iCal.addEvent({
         id: uid.toString(),
         startDate: begin,
         endDate: end,
-        isAllDay: true,
+        isAllDay: false,
         name: req.query['name'],
         description: req.query['description'],
         orgnizer: { name: 'Thomas', email: 'mail@bommy.net' },
@@ -36,9 +36,31 @@ app.post('/api/calendar/add', (req, res) => {
         createdDate: new Date(),
         lastModifiedDate: new Date(),
     });
-
+    
     globalCalendarEntryUid++;
     res.status(200).send(event);
 })
 
+app.post('/api/calendar/anniversary', (req, res) => {
+    console.log('Anniversary-add von', req.ip);
+    
+    const uid = globalCalendarEntryUid;
+    const begin = new Date(req.query['begin']);
+    
+    const event = iCal.addEvent({
+        id: uid.toString(),
+        startDate: begin,
+        endDate: begin,
+        isAllDay: true,
+        name: req.query['name'],
+        description: req.query['description'],
+        orgnizer: { name: req.query['organizer_name'], email: req.query['organizer_email'] },
+        attendees: [],
+        createdDate: new Date(),
+        lastModifiedDate: new Date(),
+    });
+    
+    globalCalendarEntryUid++;
+    res.status(200).send(event);
+})
 app.listen(port, () => console.log(`Application started at ${port}`));
