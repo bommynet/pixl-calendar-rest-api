@@ -1,20 +1,23 @@
 {
-    "name": "servercalendar",
-    "version": "0.0.1",
-    "description": "",
-    "main": "server.js",
+    "name": "pixl-calendar-rest-api",
+    "version": "1.0.0-alpha",
+    "description": "A simple iCal REST api.",
     "scripts": {
         "start": "nodemon dist/server.js",
         "tsc": "tsc"
     },
-    "author": "",
+    "author": {
+        "name": "Thomas Borck",
+        "email": "thomas.borck@bommy.net",
+        "url": "http://www.bommy.net"
+    },
     "license": "ISC",
     "dependencies": {
-        "@types/express": "^4.17.0",
         "express": "^4.17.1",
         "nodemon": "^1.19.1"
     },
     "devDependencies": {
+        "@types/express": "^4.17.0",
         "typescript": "^3.5.3"
     }
 }
