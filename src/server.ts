@@ -8,7 +8,7 @@ const iCal = new VCalendar('Bommys Kalender', '-//bommynet/pixlcal//NONSGML v1.0
 let globalCalendarEntryUid = 1;
 
 app.get('/api/calendar/sync', (req, res) => {
-    console.log('Kalender-Sync von', req.ip);
+    console.log('Calendar-Sync by', req.ip);
 
     const iCalString = iCal.toICSString();
 
@@ -17,18 +17,24 @@ app.get('/api/calendar/sync', (req, res) => {
     res.send(iCalString);
 });
 
+
+app.get('/api/calendar/appointment', (req, res) => {
+    console.log('Appointment-Read by', req.ip);
+    
+    res.status(200).send(iCal.appointments);
+})
+
 app.post('/api/calendar/appointment', (req, res) => {
-    console.log('Kalender-Add von', req.ip);
+    console.log('Appointment-Add by', req.ip);
     
     const uid = globalCalendarEntryUid;
     const begin = new Date(req.query['begin']);
     const end = new Date(req.query['end']);
     
-    const event = iCal.addEvent({
+    const event = iCal.addAppointment({
         id: uid.toString(),
-        startDate: begin,
-        endDate: end,
-        isAllDay: false,
+        begin: begin,
+        end: end,
         name: req.query['name'],
         description: req.query['description'],
         orgnizer: { name: 'Thomas', email: 'mail@bommy.net' },
@@ -41,17 +47,22 @@ app.post('/api/calendar/appointment', (req, res) => {
     res.status(200).send(event);
 })
 
+
+app.get('/api/calendar/anniversary', (req, res) => {
+    console.log('Anniversary-Read by', req.ip);
+    
+    res.status(200).send(iCal.anniversaries);
+})
+
 app.post('/api/calendar/anniversary', (req, res) => {
-    console.log('Anniversary-add von', req.ip);
+    console.log('Anniversary-Add by', req.ip);
     
     const uid = globalCalendarEntryUid;
     const begin = new Date(req.query['begin']);
     
-    const event = iCal.addEvent({
+    const event = iCal.addAnniversary({
         id: uid.toString(),
-        startDate: begin,
-        endDate: begin,
-        isAllDay: true,
+        date: begin,
         name: req.query['name'],
         description: req.query['description'],
         orgnizer: { name: req.query['organizer_name'], email: req.query['organizer_email'] },
@@ -63,4 +74,5 @@ app.post('/api/calendar/anniversary', (req, res) => {
     globalCalendarEntryUid++;
     res.status(200).send(event);
 })
+
 app.listen(port, () => console.log(`Application started at ${port}`));
