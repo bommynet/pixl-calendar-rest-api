@@ -19,27 +19,45 @@ app.get('/api/calendar/sync', (req, res) => {
 });
 
 
+/**
+ * Get all stored appointments.
+ * response:
+ *  - (200) a list of all appointments
+ */
 app.get('/api/calendar/appointment', (req, res) => {
     console.log('Appointment-ReadAll');
     res.status(200).send(iCal.appointments);
 })
 
+/**
+ * Create a new appointment.
+ * response:
+ *  - (201) created appointment
+ *  - (403) error message
+ */
 app.post('/api/calendar/appointment', (req, res) => {
     console.log('Appointment-Add');
 
     try {
-        const event = iCal.createAppointment(req.query);
-        res.status(201).send(event);
-    }catch(reason){
+        const appointment = iCal.createAppointment(req.query);
+        res.status(201).send(appointment);
+    } catch (reason) {
         res.status(403).send(reason.message);
     }
 })
 
+/**
+ * Update an existing appointment.
+ * response:
+ *  - (200) updated appointment
+ *  - (403) id is not valid
+ *  - (404) appointment not found
+ */
 app.post('/api/calendar/appointment/:id', (req, res) => {
     const id = "" + req.params['id'];
     console.log(`Appointment-Update: ${id}`);
 
-    let responseState = 404;
+    let responseState = 403;
     let responseUpdatedObject: Appointment | undefined;
 
     if (typeof id === 'string' && id.length > 0) {
@@ -47,15 +65,24 @@ app.post('/api/calendar/appointment/:id', (req, res) => {
 
         if (responseUpdatedObject)
             responseState = 200;
+        else
+            responseState = 404;
     }
 
     res.status(responseState).send(responseUpdatedObject);
 })
 
+/**
+ * Delete an existing appointment.
+ * response:
+ *  - (200) deleted appointment
+ *  - (403) id is not valid
+ *  - (404) appointment not found
+ */
 app.delete('/api/calendar/appointment/:id', (req, res) => {
     const id: string = "" + req.params['id'];
 
-    let responseState = 404;
+    let responseState = 403;
     let responseDeletedObject: Appointment | undefined;
 
     if (typeof id === 'string' && id.length > 0) {
@@ -63,6 +90,8 @@ app.delete('/api/calendar/appointment/:id', (req, res) => {
 
         if (responseDeletedObject)
             responseState = 200;
+        else
+            responseState = 404;
     }
 
     res.status(responseState).send(responseDeletedObject);
