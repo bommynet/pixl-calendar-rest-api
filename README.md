@@ -10,8 +10,8 @@ It can be used to:
 - [ ] remove anniversaries
 - [X] create new appointments - endpoint:`POST@/api/calendar/appointment`
 - [X] read all appointments - endpoint:`GET@/api/calendar/appointment`
-- [ ] edit/update appointments
-- [ ] remove appointments
+- [X] edit/update appointments - endpoint:`POST@/api/calendar/appointment/:id`
+- [X] remove appointments - endpoint:`DELETE@/api/calendar/appointment/:id`
 - [ ] create and add alarms to appointments/anniversaries
 - [ ] read all alarms of an appointment/anniversary
 - [ ] edit/update alarms of an appointment/anniversary

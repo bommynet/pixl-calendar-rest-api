@@ -46,6 +46,17 @@ export default class VCalendar {
         return addedEvent;
     }
 
+    public removeAppointment(appointment: Appointment) {
+        const nextAppointments = this._appointments.filter(entry => entry.id !== appointment.id);
+
+        const somethingDeleted = nextAppointments.length !== this._appointments.length;
+        if (somethingDeleted) {
+            this._appointments = nextAppointments;
+        }
+
+        return somethingDeleted;
+    }
+
     public addAnniversary(event: AnniversaryProbs, alarms: Alarm[] = []) {
         var addedEvent = new Anniversary(event);
         alarms.forEach(alarm => addedEvent.addAlarm(alarm));
