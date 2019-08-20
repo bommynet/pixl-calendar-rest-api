@@ -1,4 +1,4 @@
-import Appointment, { AppointmentProbs } from './Appointment';
+import Appointment from './Appointment';
 import Anniversary, { AnniversaryProbs } from './Anniversary';
 import Alarm from './Alarm';
 
@@ -7,6 +7,7 @@ export default class VCalendar {
 
     private _appointments: Appointment[];
     private _anniversaries: Anniversary[];
+    private _nextAppointmentId: number;
 
     private _name: string;
     private _scale: string;
@@ -30,6 +31,8 @@ export default class VCalendar {
         this._appointments = [];
         this._anniversaries = [];
 
+        this._nextAppointmentId = 0;
+
         this._name = calName;
         this._prodid = prodId;
         this._scale = calScale || 'GREGORIAN';
@@ -38,24 +41,57 @@ export default class VCalendar {
     }
 
 
-    public addAppointment(event: AppointmentProbs, alarms: Alarm[] = []) {
-        var addedEvent = new Appointment(event);
+    public createAppointment(event: { [field: string]: string }, alarms: Alarm[] = []) {
+        const newId = this._nextAppointmentId.toString();
+
+        const addedEvent = new Appointment(newId, event);
         alarms.forEach(alarm => addedEvent.addAlarm(alarm));
 
         this._appointments.push(addedEvent);
+        this._nextAppointmentId += 1;
         return addedEvent;
     }
 
-    public removeAppointment(appointment: Appointment) {
-        const nextAppointments = this._appointments.filter(entry => entry.id !== appointment.id);
+    public updateAppointment(id: string, data: any) {
+        const appointment = this._appointments.find(entry => entry.id === id);
+        let somethingUpdated = false;
 
-        const somethingDeleted = nextAppointments.length !== this._appointments.length;
-        if (somethingDeleted) {
-            this._appointments = nextAppointments;
+        if (appointment) {
+            /// TODO: validate data input
+            if (data['begin']) {
+                appointment.begin = data['begin'];
+                somethingUpdated = true;
+            } if (data['end']) {
+                appointment.end = data['end'];
+                somethingUpdated = true;
+            } if (data['name']) {
+                appointment.name = data['name'];
+                somethingUpdated = true;
+            } if (data['description']) {
+                appointment.description = data['description'];
+                somethingUpdated = true;
+            } if (data['organizer_name'] && data['organizer_email']) {
+                appointment.orgnizer = { name: data['organizer_name'], email: data['organizer_email'] };
+                somethingUpdated = true;
+            }
+
+            if (somethingUpdated)
+                appointment.lastModifiedDate = new Date().toISOString();
         }
 
-        return somethingDeleted;
+        return somethingUpdated ? appointment : undefined;
     }
+
+    public removeAppointment(id: string) {
+        const appointmentToDelete = this._appointments.find(entry => entry.id === id);
+
+        if (appointmentToDelete) {
+            this._appointments = this._appointments.filter(entry => entry.id !== appointmentToDelete.id);
+        }
+
+        return appointmentToDelete;
+    }
+
 
     public addAnniversary(event: AnniversaryProbs, alarms: Alarm[] = []) {
         var addedEvent = new Anniversary(event);

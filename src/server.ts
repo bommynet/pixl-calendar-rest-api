@@ -1,5 +1,6 @@
 import express from 'express';
 import VCalendar from './iCal/VCalendar';
+import Appointment from './iCal/Appointment';
 
 const app = express();
 const port = 22222;
@@ -19,62 +20,52 @@ app.get('/api/calendar/sync', (req, res) => {
 
 
 app.get('/api/calendar/appointment', (req, res) => {
-    console.log('Appointment-Read by', req.ip);
-
+    console.log('Appointment-ReadAll');
     res.status(200).send(iCal.appointments);
 })
 
 app.post('/api/calendar/appointment', (req, res) => {
-    console.log('Appointment-Add by', req.ip);
+    console.log('Appointment-Add');
 
-    const uid = globalCalendarEntryUid;
-    const begin = new Date(req.query['begin']);
-    const end = new Date(req.query['end']);
-
-    const event = iCal.addAppointment({
-        id: uid.toString(),
-        begin: begin,
-        end: end,
-        name: req.query['name'],
-        description: req.query['description'],
-        orgnizer: { name: req.query['organizer_name'], email: req.query['organizer_email'] },
-        attendees: [],
-        createdDate: new Date(),
-        lastModifiedDate: new Date(),
-    });
-
-    globalCalendarEntryUid++;
-    res.status(200).send(event);
+    try {
+        const event = iCal.createAppointment(req.query);
+        res.status(201).send(event);
+    }catch(reason){
+        res.status(403).send(reason.message);
+    }
 })
 
 app.post('/api/calendar/appointment/:id', (req, res) => {
     const id = "" + req.params['id'];
-    const appointment = iCal.appointments.find(entry => entry.id === id);
-    console.log(`Appointment-Update(${id}): ${appointment && 'exists'}`);
+    console.log(`Appointment-Update: ${id}`);
 
-    if (appointment) {
-        if (req.query['begin']) appointment.begin = new Date(req.query['begin']);
-        if (req.query['end']) appointment.end = new Date(req.query['end']);
-        if (req.query['name']) appointment.name = req.query['name'];
-        if (req.query['description']) appointment.description = req.query['description'];
-        if (req.query['organizer_name'] && req.query['organizer_email']) appointment.orgnizer = { name: req.query['organizer_name'], email: req.query['organizer_email'] };
-        appointment.lastModifiedDate = new Date();
+    let responseState = 404;
+    let responseUpdatedObject: Appointment | undefined;
+
+    if (typeof id === 'string' && id.length > 0) {
+        responseUpdatedObject = iCal.updateAppointment(id, req.query);
+
+        if (responseUpdatedObject)
+            responseState = 200;
     }
 
-    res.status(appointment ? 200 : 404).send(appointment);
+    res.status(responseState).send(responseUpdatedObject);
 })
 
 app.delete('/api/calendar/appointment/:id', (req, res) => {
-    const id = "" + req.params['id'];
-    const appointment = iCal.appointments.find(entry => entry.id === id);
-    console.log(`Appointment-Delete(${id}): ${appointment && 'exists'}`);
+    const id: string = "" + req.params['id'];
 
-    let deletedAppointment = false;
-    if (appointment) {
-        deletedAppointment = iCal.removeAppointment(appointment);
+    let responseState = 404;
+    let responseDeletedObject: Appointment | undefined;
+
+    if (typeof id === 'string' && id.length > 0) {
+        responseDeletedObject = iCal.removeAppointment(id);
+
+        if (responseDeletedObject)
+            responseState = 200;
     }
 
-    res.status(deletedAppointment ? 200 : 404).send(appointment);
+    res.status(responseState).send(responseDeletedObject);
 })
 
 
