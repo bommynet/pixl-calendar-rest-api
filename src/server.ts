@@ -120,7 +120,7 @@ app.post('/api/calendar/anniversary', (req, res) => {
     console.log('Anniversary-Add by', req.ip);
 
     try {
-        const anniverary = iCal.addAnniversary(req.query);
+        const anniverary = iCal.createAnniversary(req.query);
         res.status(201).send(anniverary);
     } catch (reason) {
         res.status(403).send(reason.message);

@@ -46,7 +46,7 @@ export default class VCalendar {
     public createAppointment(event: { [field: string]: string }, alarms: Alarm[] = []) {
         const newId = this._nextAppointmentId.toString();
 
-        const addedEvent = new Appointment(newId, event);
+        const addedEvent = new Appointment(`appointment-${newId}`, event);
         alarms.forEach(alarm => addedEvent.addAlarm(alarm));
 
         this._appointments.push(addedEvent);
@@ -55,7 +55,7 @@ export default class VCalendar {
     }
 
     public updateAppointment(id: string, data: any) {
-        const appointment = this._appointments.find(entry => entry.id === id);
+        const appointment = this._appointments.find(entry => entry.id === `appointment-${id}`);
         let somethingUpdated = false;
 
         if (appointment) {
@@ -85,7 +85,7 @@ export default class VCalendar {
     }
 
     public removeAppointment(id: string) {
-        const appointmentToDelete = this._appointments.find(entry => entry.id === id);
+        const appointmentToDelete = this._appointments.find(entry => entry.id === `appointment-${id}`);
 
         if (appointmentToDelete) {
             this._appointments = this._appointments.filter(entry => entry.id !== appointmentToDelete.id);
@@ -95,10 +95,10 @@ export default class VCalendar {
     }
 
 
-    public addAnniversary(event: { [field: string]: string }, alarms: Alarm[] = []) {
-        const newId = this._nextAppointmentId.toString();
+    public createAnniversary(event: { [field: string]: string }, alarms: Alarm[] = []) {
+        const newId = this._nextAnniversaryId.toString();
 
-        const addedEvent = new Anniversary(newId, event);
+        const addedEvent = new Anniversary(`anniversary-${newId}`, event);
         alarms.forEach(alarm => addedEvent.addAlarm(alarm));
 
         this._anniversaries.push(addedEvent);
@@ -107,7 +107,7 @@ export default class VCalendar {
     }
 
     public updateAnniversary(id: string, data: any) {
-        const anniversary = this._anniversaries.find(entry => entry.id === id);
+        const anniversary = this._anniversaries.find(entry => entry.id === `anniversary-${id}`);
         let somethingUpdated = false;
 
         if (anniversary) {
@@ -134,7 +134,7 @@ export default class VCalendar {
     }
 
     public removeAnniversary(id: string) {
-        const anniversaryToDelete = this._anniversaries.find(entry => entry.id === id);
+        const anniversaryToDelete = this._anniversaries.find(entry => entry.id === `anniversary-${id}`);
 
         if (anniversaryToDelete) {
             this._anniversaries = this._anniversaries.filter(entry => entry.id !== anniversaryToDelete.id);

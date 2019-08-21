@@ -1,56 +1,19 @@
-import Alarm from "./Alarm";
-import { iCalPersonObject } from "./types";
+import AbstractCalendarEvent from "./AbstractEvent";
 
+export default class Appointment extends AbstractCalendarEvent {
 
-export default class Appointment {
-
-    public id: string;
     public begin: string;
     public end: string;
-    public name: string;
-    public description?: string;
-    public location?: string;
-    public visibility?: string;
-    public status: string;
-    public sequence: number;
-    public category?: string;
-    public orgnizer: iCalPersonObject;
-    public attendees: iCalPersonObject[];
-    public createdDate: string;
-    public lastModifiedDate: string;
-
-    public alarms: Alarm[];
-
 
     public constructor(id: string, props: { [field: string]: string }) {
-        if (['begin', 'end', 'name', 'organizer_name', 'organizer_email'].some(key => typeof props[key] === 'undefined'))
+        super(id, props);
+
+        if (['begin', 'end'].some(key => typeof props[key] === 'undefined'))
             throw new TypeError('One or more fields are missing in "props".');
 
-        const timestamp = new Date().toISOString();
-
-        this.id = id;
         this.begin = props['begin'];
         this.end = props['end'];
-        this.name = props['name'];
-        this.description = props['description'];
-        this.location = props['location'];
-        this.visibility = props['visibility'] || 'PUBLIC';
-        this.status = 'CONFIRMED';
-        this.sequence = 0;
-        this.category = props['category'];
-        this.orgnizer = { name: props['organizer_name'], email: props['organizer_email'] };
-        this.attendees = [];
-        this.createdDate = timestamp;
-        this.lastModifiedDate = timestamp;
-
-        this.alarms = [];
     }
-
-
-    public addAlarm(alarm: Alarm): void {
-        this.alarms.push(alarm);
-    }
-
 
     public toICSString(): string {
         const lines: string[] = [

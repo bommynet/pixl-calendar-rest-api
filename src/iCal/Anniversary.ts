@@ -1,64 +1,26 @@
-import Alarm from "./Alarm";
-import { iCalPersonObject } from "./types";
+import AbstractCalendarEvent from "./AbstractEvent";
 
+export default class Anniversary extends AbstractCalendarEvent {
 
-export default class Anniversary {
-
-    public id: string;
     public date: string;
-    public name: string;
-    public description?: string;
-    public location?: string;
-    public visibility?: string;
-    public status: string;
-    public sequence: number;
-    public category?: string;
-    public orgnizer: iCalPersonObject;
-    public attendees: iCalPersonObject[];
-    public createdDate: string;
-    public lastModifiedDate: string;
-
-    public alarms: Alarm[];
-
 
     public constructor(id: string, props: { [field: string]: string }) {
-        if (['date', 'name', 'organizer_name', 'organizer_email'].some(key => typeof props[key] === 'undefined'))
+        super(id, props);
+
+        if (typeof props['date'] === 'undefined')
             throw new TypeError('One or more fields are missing in "props".');
-
-        const timestamp = new Date().toISOString();
-
-        this.id = id;
+            
         this.date = props['date'];
-        this.name = props['name'];
-        this.description = props['description'];
-        this.location = props['location'];
-        this.visibility = props['visibility'] || 'PUBLIC';
-        this.status = 'CONFIRMED';
-        this.sequence = 0;
-        this.category = props['category'];
-        this.orgnizer = { name: props['organizer_name'], email: props['organizer_email'] };
-        this.attendees = [];
-        this.createdDate = timestamp;
-        this.lastModifiedDate = timestamp;
-
-        this.alarms = [];
     }
-
-
-    public addAlarm(alarm: Alarm): void {
-        this.alarms.push(alarm);
-    }
-
 
     public toICSString(): string {
-        const rawdate = this.date;
-        const shrunkdate = rawdate.substring(0, rawdate.indexOf('T'));
+        const shrunkdate = this.date.substring(0, this.date.indexOf('T'));
 
         const lines: string[] = [
             'BEGIN:VEVENT',
             'TRANSP:TRANSPARENT',
             'UID:' + this.id,
-            'DTSTAMP:' + rawdate,
+            'DTSTAMP:' + this.date,
             'DTSTART;VALUE=DATE:' + shrunkdate,
             'DTEND;VALUE=DATE:' + shrunkdate,
             'SUMMARY:' + this.name,
