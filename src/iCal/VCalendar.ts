@@ -1,3 +1,5 @@
+import storage from 'node-persist';
+
 import Appointment from './Appointment';
 import Anniversary from './Anniversary';
 import Alarm from './Alarm';
@@ -40,17 +42,55 @@ export default class VCalendar {
         this._scale = calScale || 'GREGORIAN';
         this._version = version || '2.0';
         this._method = method || 'PUBLISH';
+
+
+        // setup storage
+        storage.init()
+            .then(() => { console.log('Storage ready'); })
+            .then(() => storage.forEach(async (entry) => {
+                if (entry.key === '__config') {
+                    this._nextAppointmentId = entry.value.appointmentId;
+                    this._nextAnniversaryId = entry.value.anniversaryId;
+                    console.log('Storage: config done');
+                } else if (entry.key.startsWith('appointment')) {
+                    console.log('Storage: load appointment', entry.key);
+
+                    entry.value.organizer_name = entry.value.organizer.name;
+                    entry.value.organizer_email = entry.value.organizer.email;
+
+                    const addedEvent = new Appointment(entry.key, entry.value);
+                    Object.keys(addedEvent).forEach(key => addedEvent[key] = entry.value[key]);
+                    this._appointments.push(addedEvent);
+                } else if (entry.key.startsWith('anniversary')) {
+                    console.log('Storage: load anniversary', entry.key);
+
+                    entry.value.organizer_name = entry.value.organizer.name;
+                    entry.value.organizer_email = entry.value.organizer.email;
+
+                    const addedEvent = new Anniversary(entry.key, entry.value);
+                    Object.keys(addedEvent).forEach(key => addedEvent[key] = entry.value[key]);
+                    this._anniversaries.push(addedEvent);
+                }
+            }))
+            .catch((error) => {
+                console.error(error);
+            })
     }
 
 
-    public createAppointment(event: { [field: string]: string }, alarms: Alarm[] = []) {
+    public createAppointment(props: { [field: string]: string }, alarms: Alarm[] = []) {
         const newId = this._nextAppointmentId.toString();
 
-        const addedEvent = new Appointment(`appointment-${newId}`, event);
+        const addedEvent = new Appointment(`appointment-${newId}`, props);
         alarms.forEach(alarm => addedEvent.addAlarm(alarm));
 
         this._appointments.push(addedEvent);
         this._nextAppointmentId += 1;
+
+        // setup storage
+        storage.set(`appointment-${newId}`, addedEvent);
+        storage.set('__config', { appointmentId: this._nextAppointmentId, anniversaryId: this._nextAnniversaryId });
+
         return addedEvent;
     }
 
@@ -73,7 +113,7 @@ export default class VCalendar {
                 appointment.description = data['description'];
                 somethingUpdated = true;
             } if (data['organizer_name'] && data['organizer_email']) {
-                appointment.orgnizer = { name: data['organizer_name'], email: data['organizer_email'] };
+                appointment.organizer = { name: data['organizer_name'], email: data['organizer_email'] };
                 somethingUpdated = true;
             }
 
@@ -103,6 +143,11 @@ export default class VCalendar {
 
         this._anniversaries.push(addedEvent);
         this._nextAnniversaryId += 1;
+
+        // setup storage
+        storage.set(`anniversary-${newId}`, addedEvent);
+        storage.set('__config', { appointmentId: this._nextAppointmentId, anniversaryId: this._nextAnniversaryId });
+
         return addedEvent;
     }
 
@@ -122,7 +167,7 @@ export default class VCalendar {
                 anniversary.description = data['description'];
                 somethingUpdated = true;
             } if (data['organizer_name'] && data['organizer_email']) {
-                anniversary.orgnizer = { name: data['organizer_name'], email: data['organizer_email'] };
+                anniversary.organizer = { name: data['organizer_name'], email: data['organizer_email'] };
                 somethingUpdated = true;
             }
 

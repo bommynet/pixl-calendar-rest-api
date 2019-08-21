@@ -11,7 +11,7 @@ class AbstractCalendarEvent {
     public status: string;
     public sequence: number;
     public category?: string;
-    public orgnizer: iCalPersonObject;
+    public organizer: iCalPersonObject;
     public attendees: iCalPersonObject[];
     public createdDate: string;
     public lastModifiedDate: string;
@@ -19,8 +19,10 @@ class AbstractCalendarEvent {
     public alarms: Alarm[];
 
     constructor(id: string, props: { [field: string]: string }) {
-        if (['name', 'organizer_name', 'organizer_email'].some(key => typeof props[key] === 'undefined'))
-            throw new TypeError('One or more fields are missing in "props".');
+        const missingFields = ['name', 'organizer_name', 'organizer_email'].filter(key => typeof props[key] === 'undefined');
+
+        if (missingFields.length > 0)
+            throw new TypeError(`[AbstractEvent] One or more fields are missing in "props": ${missingFields.join(',')}`);
 
         const timestamp = new Date().toISOString();
 
@@ -32,7 +34,7 @@ class AbstractCalendarEvent {
         this.status = 'CONFIRMED';
         this.sequence = 0;
         this.category = props['category'];
-        this.orgnizer = { name: props['organizer_name'], email: props['organizer_email'] };
+        this.organizer = { name: props['organizer_name'], email: props['organizer_email'] };
         this.attendees = [];
         this.createdDate = timestamp;
         this.lastModifiedDate = timestamp;

@@ -16,6 +16,10 @@ It can be used to:
 - [ ] read all alarms of an appointment/anniversary
 - [ ] edit/update alarms of an appointment/anniversary
 - [ ] remove alarms of an appointment/anniversary
-- [ ] persist calendars
+- [X] persist calendars (local file system)
+  - [X] CREATE
+  - [ ] UPDATE
+  - [ ] DELETE
+- [ ] persist calendars (e. g. database)
 
 This project based on work from [Shaun Xu](http://geekswithblogs.net/shaunxu/archive/2016/03/18/implement-ical-subscription-service-through-in-node.js.aspx).

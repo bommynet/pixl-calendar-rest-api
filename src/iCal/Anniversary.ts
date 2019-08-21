@@ -8,7 +8,7 @@ export default class Anniversary extends AbstractCalendarEvent {
         super(id, props);
 
         if (typeof props['date'] === 'undefined')
-            throw new TypeError('One or more fields are missing in "props".');
+            throw new TypeError('[Anniversary] One or more fields are missing in "props".');
             
         this.date = props['date'];
     }
@@ -29,7 +29,7 @@ export default class Anniversary extends AbstractCalendarEvent {
             'SEQUENCE:' + this.sequence,
             'CREATED:' + this.createdDate,
             'LAST-MODIFIED:' + this.lastModifiedDate,
-            `ORGANIZER;CN=${this.orgnizer.name}:MAILTO:${this.orgnizer.email}`
+            `ORGANIZER;CN=${this.organizer.name}:MAILTO:${this.organizer.email}`
         ];
 
         // optional Entries

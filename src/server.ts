@@ -1,13 +1,14 @@
 import express from 'express';
+
 import VCalendar from './iCal/VCalendar';
 import Appointment from './iCal/Appointment';
 import Anniversary from './iCal/Anniversary';
 
+// prepare globals
 const app = express();
 const port = 22222;
 const iCal = new VCalendar('Bommys Kalender', '-//bommynet/pixlcal//NONSGML v1.0-alpha//DE');
 
-let globalCalendarEntryUid = 1;
 
 app.get('/api/calendar/sync', (req, res) => {
     console.log('Calendar-Sync by', req.ip);

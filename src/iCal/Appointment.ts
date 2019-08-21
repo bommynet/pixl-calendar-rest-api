@@ -9,7 +9,7 @@ export default class Appointment extends AbstractCalendarEvent {
         super(id, props);
 
         if (['begin', 'end'].some(key => typeof props[key] === 'undefined'))
-            throw new TypeError('One or more fields are missing in "props".');
+            throw new TypeError('[Appointment] One or more fields are missing in "props".');
 
         this.begin = props['begin'];
         this.end = props['end'];
@@ -29,7 +29,7 @@ export default class Appointment extends AbstractCalendarEvent {
             'SEQUENCE:' + this.sequence,
             'CREATED:' + this.createdDate,
             'LAST-MODIFIED:' + this.lastModifiedDate,
-            `ORGANIZER;CN=${this.orgnizer.name}:MAILTO:${this.orgnizer.email}`
+            `ORGANIZER;CN=${this.organizer.name}:MAILTO:${this.organizer.email}`
         ];
 
         // optional Entries
