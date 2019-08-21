@@ -40,8 +40,8 @@ export default class Appointment {
         this.category = props['category'];
         this.orgnizer = { name: props['organizer_name'], email: props['organizer_email'] };
         this.attendees = [];
-        this.createdDate = timestamp,
-        this.lastModifiedDate = timestamp,
+        this.createdDate = timestamp;
+        this.lastModifiedDate = timestamp;
 
         this.alarms = [];
     }

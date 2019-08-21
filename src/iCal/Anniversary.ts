@@ -1,25 +1,11 @@
 import Alarm from "./Alarm";
 import { iCalPersonObject } from "./types";
 
-export interface AnniversaryProbs {
-    id: string;
-    date: Date;
-    name: string;
-    description?: string;
-    location?: string;
-    visibility?: string;
-    category?: string;
-    orgnizer: iCalPersonObject;
-    attendees: iCalPersonObject[];
-    createdDate: Date;
-    lastModifiedDate: Date;
-}
-
 
 export default class Anniversary {
 
     public id: string;
-    public date: Date;
+    public date: string;
     public name: string;
     public description?: string;
     public location?: string;
@@ -29,31 +15,31 @@ export default class Anniversary {
     public category?: string;
     public orgnizer: iCalPersonObject;
     public attendees: iCalPersonObject[];
-    public createdDate: Date;
-    public lastModifiedDate: Date;
+    public createdDate: string;
+    public lastModifiedDate: string;
 
     public alarms: Alarm[];
 
 
-    public constructor(props: AnniversaryProbs) {
-        this.id = props.id;
-        this.date = props.date;
-        this.name = props.name;
-        this.description = props.description;
-        this.location = props.location;
-        this.visibility = props.visibility || 'PUBLIC';
+    public constructor(id: string, props: { [field: string]: string }) {
+        if (['date', 'name', 'organizer_name', 'organizer_email'].some(key => typeof props[key] === 'undefined'))
+            throw new TypeError('One or more fields are missing in "props".');
+
+        const timestamp = new Date().toISOString();
+
+        this.id = id;
+        this.date = props['date'];
+        this.name = props['name'];
+        this.description = props['description'];
+        this.location = props['location'];
+        this.visibility = props['visibility'] || 'PUBLIC';
         this.status = 'CONFIRMED';
         this.sequence = 0;
-        this.category = props.category;
-        this.orgnizer = props.orgnizer;
-        this.attendees = props.attendees;
-        this.createdDate = props.createdDate;
-        this.lastModifiedDate = props.lastModifiedDate;
-
-        // there is no use for milliseconds in iCal
-        this.date.setMilliseconds(0);
-        this.createdDate.setMilliseconds(0);
-        this.lastModifiedDate.setMilliseconds(0);
+        this.category = props['category'];
+        this.orgnizer = { name: props['organizer_name'], email: props['organizer_email'] };
+        this.attendees = [];
+        this.createdDate = timestamp;
+        this.lastModifiedDate = timestamp;
 
         this.alarms = [];
     }
@@ -65,7 +51,7 @@ export default class Anniversary {
 
 
     public toICSString(): string {
-        const rawdate = this.date.toISOString();
+        const rawdate = this.date;
         const shrunkdate = rawdate.substring(0, rawdate.indexOf('T'));
 
         const lines: string[] = [
@@ -79,8 +65,8 @@ export default class Anniversary {
             'CLASS:' + this.visibility,
             'STATUS:' + this.status,
             'SEQUENCE:' + this.sequence,
-            'CREATED:' + this.createdDate.toISOString(),
-            'LAST-MODIFIED:' + this.lastModifiedDate.toISOString(),
+            'CREATED:' + this.createdDate,
+            'LAST-MODIFIED:' + this.lastModifiedDate,
             `ORGANIZER;CN=${this.orgnizer.name}:MAILTO:${this.orgnizer.email}`
         ];
 

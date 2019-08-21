@@ -6,8 +6,8 @@ It can be used to:
 - [X] export .ical files - endpoint:`GET@/api/calendar/sync`
 - [X] create new anniversaries - endpoint:`POST@/api/calendar/anniversary`
 - [X] read all anniversaries - endpoint:`GET@/api/calendar/anniversary`
-- [ ] edit/update anniversaries
-- [ ] remove anniversaries
+- [X] edit/update anniversaries
+- [X] remove anniversaries
 - [X] create new appointments - endpoint:`POST@/api/calendar/appointment`
 - [X] read all appointments - endpoint:`GET@/api/calendar/appointment`
 - [X] edit/update appointments - endpoint:`POST@/api/calendar/appointment/:id`

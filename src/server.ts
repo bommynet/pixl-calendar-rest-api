@@ -1,6 +1,7 @@
 import express from 'express';
 import VCalendar from './iCal/VCalendar';
 import Appointment from './iCal/Appointment';
+import Anniversary from './iCal/Anniversary';
 
 const app = express();
 const port = 22222;
@@ -98,31 +99,83 @@ app.delete('/api/calendar/appointment/:id', (req, res) => {
 })
 
 
+/**
+ * Get all stored anniversaries.
+ * response:
+ *  - (200) a list of all anniversaries
+ */
 app.get('/api/calendar/anniversary', (req, res) => {
     console.log('Anniversary-Read by', req.ip);
 
     res.status(200).send(iCal.anniversaries);
 })
 
+/**
+ * Create a new anniversary.
+ * response:
+ *  - (201) created anniversary
+ *  - (403) error message
+ */
 app.post('/api/calendar/anniversary', (req, res) => {
     console.log('Anniversary-Add by', req.ip);
 
-    const uid = globalCalendarEntryUid;
-    const begin = new Date(req.query['begin']);
+    try {
+        const anniverary = iCal.addAnniversary(req.query);
+        res.status(201).send(anniverary);
+    } catch (reason) {
+        res.status(403).send(reason.message);
+    }
+})
 
-    const event = iCal.addAnniversary({
-        id: uid.toString(),
-        date: begin,
-        name: req.query['name'],
-        description: req.query['description'],
-        orgnizer: { name: req.query['organizer_name'], email: req.query['organizer_email'] },
-        attendees: [],
-        createdDate: new Date(),
-        lastModifiedDate: new Date(),
-    });
+/**
+ * Update an existing anniversary.
+ * response:
+ *  - (200) updated anniversary
+ *  - (403) id is not valid
+ *  - (404) anniversary not found
+ */
+app.post('/api/calendar/anniversary/:id', (req, res) => {
+    const id = "" + req.params['id'];
+    console.log(`Anniversary-Update: ${id}`);
 
-    globalCalendarEntryUid++;
-    res.status(200).send(event);
+    let responseState = 403;
+    let responseUpdatedObject: Anniversary | undefined;
+
+    if (typeof id === 'string' && id.length > 0) {
+        responseUpdatedObject = iCal.updateAnniversary(id, req.query);
+
+        if (responseUpdatedObject)
+            responseState = 200;
+        else
+            responseState = 404;
+    }
+
+    res.status(responseState).send(responseUpdatedObject);
+})
+
+/**
+ * Delete an existing anniversary.
+ * response:
+ *  - (200) deleted anniversary
+ *  - (403) id is not valid
+ *  - (404) anniversary not found
+ */
+app.delete('/api/calendar/anniversary/:id', (req, res) => {
+    const id: string = "" + req.params['id'];
+
+    let responseState = 403;
+    let responseDeletedObject: Anniversary | undefined;
+
+    if (typeof id === 'string' && id.length > 0) {
+        responseDeletedObject = iCal.removeAnniversary(id);
+
+        if (responseDeletedObject)
+            responseState = 200;
+        else
+            responseState = 404;
+    }
+
+    res.status(responseState).send(responseDeletedObject);
 })
 
 app.listen(port, () => console.log(`Application started at ${port}`));
