@@ -1,8 +1,8 @@
 import storage from 'node-persist';
 
-import Appointment from './Appointment';
-import Anniversary from './Anniversary';
-import Alarm from './Alarm';
+import Appointment from './entities/Appointment';
+import Anniversary from './entities/Anniversary';
+import Alarm from './entities/Alarm';
 
 
 export default class VCalendar {
@@ -12,16 +12,13 @@ export default class VCalendar {
     private _nextAppointmentId: number;
     private _nextAnniversaryId: number;
 
-    private _name: string;
-    private _scale: string;
-    private _version: string;
-    private _method: string;
-    private _prodid: string;
+    public name: string;
+    public scale: string;
+    public version: string;
+    public method: string;
+    public prodid: string;
 
 
-    public get name(): string {
-        return this._name;
-    }
     public get appointments(): Appointment[] {
         return this._appointments;
     }
@@ -37,11 +34,11 @@ export default class VCalendar {
         this._nextAppointmentId = 0;
         this._nextAnniversaryId = 0;
 
-        this._name = calName;
-        this._prodid = prodId;
-        this._scale = calScale || 'GREGORIAN';
-        this._version = version || '2.0';
-        this._method = method || 'PUBLISH';
+        this.name = calName;
+        this.prodid = prodId;
+        this.scale = calScale || 'GREGORIAN';
+        this.version = version || '2.0';
+        this.method = method || 'PUBLISH';
 
 
         // setup storage
@@ -186,25 +183,5 @@ export default class VCalendar {
         }
 
         return anniversaryToDelete;
-    }
-
-
-    public toICSString() {
-        var lines: string[] = [
-            'BEGIN:VCALENDAR',
-            'CALSCALE:' + this._scale,
-            'VERSION:' + this._version,
-            'X-WR-CALNAME:' + this._name,
-            'METHOD:' + this._method,
-            'PRODID:' + this._prodid,
-        ];
-
-        this._anniversaries.forEach(event => lines.push(event.toICSString()));
-        this._appointments.forEach(event => lines.push(event.toICSString()));
-
-        lines.push('END:VCALENDAR');
-
-        console.log(lines.join('\n'));
-        return lines.join('\r\n');
     }
 }

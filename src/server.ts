@@ -1,8 +1,9 @@
 import express from 'express';
 
 import VCalendar from './iCal/VCalendar';
-import Appointment from './iCal/Appointment';
-import Anniversary from './iCal/Anniversary';
+import Appointment from './iCal/entities/Appointment';
+import Anniversary from './iCal/entities/Anniversary';
+import { calendarToICal } from './iCal/parser/entityToICal';
 
 // prepare globals
 const app = express();
@@ -13,7 +14,7 @@ const iCal = new VCalendar('Bommys Kalender', '-//bommynet/pixlcal//NONSGML v1.0
 app.get('/api/calendar/sync', (req, res) => {
     console.log('Calendar-Sync by', req.ip);
 
-    const iCalString = iCal.toICSString();
+    const iCalString = calendarToICal(iCal);
 
     res.set('Content-Type', 'text/calendar;charset=utf-8');
     res.set('Content-Disposition', 'attachment; filename="calendar.ics"');

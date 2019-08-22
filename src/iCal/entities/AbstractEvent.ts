@@ -1,5 +1,5 @@
 import Alarm from "./Alarm";
-import { iCalPersonObject } from "./types";
+import { iCalPersonObject } from "../../types";
 
 
 class AbstractCalendarEvent {
