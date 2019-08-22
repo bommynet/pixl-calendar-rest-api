@@ -1,11 +1,13 @@
-import storage from 'node-persist';
-
 import Appointment from './entities/Appointment';
 import Anniversary from './entities/Anniversary';
 import Alarm from './entities/Alarm';
 
+import Storage from '../storage/NodePersist';
+
 
 export default class VCalendar {
+
+    private _storage: Storage;
 
     private _appointments: Appointment[];
     private _anniversaries: Anniversary[];
@@ -28,6 +30,8 @@ export default class VCalendar {
 
 
     public constructor(calName: string, prodId: string, calScale?: string, version?: string, method?: string) {
+        this._storage = new Storage();
+
         this._appointments = [];
         this._anniversaries = [];
 
@@ -42,36 +46,27 @@ export default class VCalendar {
 
 
         // setup storage
-        storage.init()
-            .then(() => { console.log('Storage ready'); })
-            .then(() => storage.forEach(async (entry) => {
-                if (entry.key === '__config') {
-                    this._nextAppointmentId = entry.value.appointmentId;
-                    this._nextAnniversaryId = entry.value.anniversaryId;
-                    console.log('Storage: config done');
-                } else if (entry.key.startsWith('appointment')) {
-                    console.log('Storage: load appointment', entry.key);
-
-                    entry.value.organizer_name = entry.value.organizer.name;
-                    entry.value.organizer_email = entry.value.organizer.email;
-
-                    const addedEvent = new Appointment(entry.key, entry.value);
-                    Object.keys(addedEvent).forEach(key => addedEvent[key] = entry.value[key]);
-                    this._appointments.push(addedEvent);
-                } else if (entry.key.startsWith('anniversary')) {
-                    console.log('Storage: load anniversary', entry.key);
-
-                    entry.value.organizer_name = entry.value.organizer.name;
-                    entry.value.organizer_email = entry.value.organizer.email;
-
-                    const addedEvent = new Anniversary(entry.key, entry.value);
-                    Object.keys(addedEvent).forEach(key => addedEvent[key] = entry.value[key]);
-                    this._anniversaries.push(addedEvent);
-                }
-            }))
-            .catch((error) => {
-                console.error(error);
+        this._storage.init()
+            .then((config) => {
+                this._nextAppointmentId = config.appointmentId;
+                this._nextAnniversaryId = config.anniversaryId;
+                console.log('Storage ready');
             })
+            .then(() => {
+                console.log('Storage: load all anniversaries');
+                return this._storage.loadAllAnniversaries();
+            })
+            .then((anniversaries) => {
+                this._anniversaries = anniversaries;
+                console.log(`  - ${anniversaries.length} loaded.`);
+                console.log('Storage: load all appointments');
+                return this._storage.loadAllAppointments();
+            })
+            .then((appointments) => {
+                this._appointments = appointments;
+                console.log(`  - ${appointments.length} loaded.`);
+            })
+            .catch(console.error);
     }
 
 
@@ -85,8 +80,8 @@ export default class VCalendar {
         this._nextAppointmentId += 1;
 
         // setup storage
-        storage.set(`appointment-${newId}`, addedEvent);
-        storage.set('__config', { appointmentId: this._nextAppointmentId, anniversaryId: this._nextAnniversaryId });
+        this._storage.store(addedEvent);
+        this._storage.updateConfig(this._nextAnniversaryId, this._nextAppointmentId);
 
         return addedEvent;
     }
@@ -142,8 +137,8 @@ export default class VCalendar {
         this._nextAnniversaryId += 1;
 
         // setup storage
-        storage.set(`anniversary-${newId}`, addedEvent);
-        storage.set('__config', { appointmentId: this._nextAppointmentId, anniversaryId: this._nextAnniversaryId });
+        this._storage.store(addedEvent);
+        this._storage.updateConfig(this._nextAnniversaryId, this._nextAppointmentId);
 
         return addedEvent;
     }
