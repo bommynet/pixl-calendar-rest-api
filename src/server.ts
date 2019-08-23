@@ -56,7 +56,7 @@ app.post('/api/calendar/appointment', (req, res) => {
  *  - (403) id is not valid
  *  - (404) appointment not found
  */
-app.post('/api/calendar/appointment/:id', (req, res) => {
+app.post('/api/calendar/appointment/:id', async (req, res) => {
     const id = "" + req.params['id'];
     console.log(`Appointment-Update: ${id}`);
 
@@ -64,12 +64,16 @@ app.post('/api/calendar/appointment/:id', (req, res) => {
     let responseUpdatedObject: Appointment | undefined;
 
     if (typeof id === 'string' && id.length > 0) {
-        responseUpdatedObject = iCal.updateAppointment(id, req.query);
+        try {
+            responseUpdatedObject = await iCal.updateAppointment(id, req.query);
 
-        if (responseUpdatedObject)
-            responseState = 200;
-        else
-            responseState = 404;
+            if (responseUpdatedObject)
+                responseState = 200;
+            else
+                responseState = 404;
+        } catch (error) {
+            responseState = 500;
+        }
     }
 
     res.status(responseState).send(responseUpdatedObject);
@@ -136,7 +140,7 @@ app.post('/api/calendar/anniversary', (req, res) => {
  *  - (403) id is not valid
  *  - (404) anniversary not found
  */
-app.post('/api/calendar/anniversary/:id', (req, res) => {
+app.post('/api/calendar/anniversary/:id', async (req, res) => {
     const id = "" + req.params['id'];
     console.log(`Anniversary-Update: ${id}`);
 
@@ -144,12 +148,16 @@ app.post('/api/calendar/anniversary/:id', (req, res) => {
     let responseUpdatedObject: Anniversary | undefined;
 
     if (typeof id === 'string' && id.length > 0) {
-        responseUpdatedObject = iCal.updateAnniversary(id, req.query);
+        try {
+            responseUpdatedObject = await iCal.updateAnniversary(id, req.query);
 
-        if (responseUpdatedObject)
-            responseState = 200;
-        else
-            responseState = 404;
+            if (responseUpdatedObject)
+                responseState = 200;
+            else
+                responseState = 404;
+        } catch (error) {
+            responseState = 500;
+        }
     }
 
     res.status(responseState).send(responseUpdatedObject);

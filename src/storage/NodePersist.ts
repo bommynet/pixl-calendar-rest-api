@@ -31,6 +31,13 @@ class NodePersist {
         return await storage.set(entity['id'], entity);
     }
 
+    public async delete(entity: any): Promise<void> {
+        if (typeof entity['id'] === 'undefined')
+            throw new TypeError("entities without 'id' are not deletable");
+
+        return await storage.del(entity['id']);
+    }
+
     public async read(id: string): Promise<any> {
         return await storage.get(id);
     }

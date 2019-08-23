@@ -86,7 +86,7 @@ export default class VCalendar {
         return addedEvent;
     }
 
-    public updateAppointment(id: string, data: any) {
+    public async updateAppointment(id: string, data: any) {
         const appointment = this._appointments.find(entry => entry.id === `appointment-${id}`);
         let somethingUpdated = false;
 
@@ -109,8 +109,16 @@ export default class VCalendar {
                 somethingUpdated = true;
             }
 
-            if (somethingUpdated)
+            if (somethingUpdated) {
                 appointment.lastModifiedDate = new Date().toISOString();
+
+                try {
+                    await this._storage.store(appointment);
+                    console.log('Storage: updated', appointment.id);
+                } catch (error) {
+                    console.error(error);
+                }
+            }
         }
 
         return somethingUpdated ? appointment : undefined;
@@ -121,6 +129,7 @@ export default class VCalendar {
 
         if (appointmentToDelete) {
             this._appointments = this._appointments.filter(entry => entry.id !== appointmentToDelete.id);
+            this._storage.delete(appointmentToDelete);
         }
 
         return appointmentToDelete;
@@ -143,7 +152,7 @@ export default class VCalendar {
         return addedEvent;
     }
 
-    public updateAnniversary(id: string, data: any) {
+    public async updateAnniversary(id: string, data: any) {
         const anniversary = this._anniversaries.find(entry => entry.id === `anniversary-${id}`);
         let somethingUpdated = false;
 
@@ -163,8 +172,16 @@ export default class VCalendar {
                 somethingUpdated = true;
             }
 
-            if (somethingUpdated)
+            if (somethingUpdated){
                 anniversary.lastModifiedDate = new Date().toISOString();
+
+                try {
+                    await this._storage.store(anniversary);
+                    console.log('Storage: updated', anniversary.id);
+                } catch (error) {
+                    console.error(error);
+                }
+            }
         }
 
         return somethingUpdated ? anniversary : undefined;
@@ -175,6 +192,7 @@ export default class VCalendar {
 
         if (anniversaryToDelete) {
             this._anniversaries = this._anniversaries.filter(entry => entry.id !== anniversaryToDelete.id);
+            this._storage.delete(anniversaryToDelete);
         }
 
         return anniversaryToDelete;

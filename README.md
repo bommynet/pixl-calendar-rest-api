@@ -18,8 +18,8 @@ It can be used to:
 - [ ] remove alarms of an appointment/anniversary
 - [X] persist calendars (local file system)
   - [X] CREATE
-  - [ ] UPDATE
-  - [ ] DELETE
+  - [X] UPDATE
+  - [X] DELETE
 - [ ] persist calendars (e. g. database)
 
 This project based on work from [Shaun Xu](http://geekswithblogs.net/shaunxu/archive/2016/03/18/implement-ical-subscription-service-through-in-node.js.aspx).
