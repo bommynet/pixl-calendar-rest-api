@@ -2,7 +2,7 @@ import Appointment from "../entities/Appointment";
 import Anniversary from "../entities/Anniversary";
 import Calendar from "../Calendar";
 
-export function calendarToICal(calendar:Calendar):string {
+export function calendarToICal(calendar: Calendar): string {
     var lines: string[] = [
         'BEGIN:VCALENDAR',
         'CALSCALE:' + calendar.scale,
@@ -50,7 +50,6 @@ export function appointmentToICal(appointment: Appointment): string {
         lines.push(`ATTENDEE;CN=${attendee.name}:MAILTO:${attendee.email}`);
     });
 
-    appointment.alarms.forEach(alarm => lines.push(alarm.toICSString()));
     lines.push('END:VEVENT');
 
     return lines.join('\r\n');
@@ -86,8 +85,6 @@ export function anniversaryToICal(anniversary: Anniversary): string {
     anniversary.attendees.forEach(attendee => {
         lines.push(`ATTENDEE;CN=${attendee.name}:MAILTO:${attendee.email}`);
     });
-
-    anniversary.alarms.forEach(alarm => lines.push(alarm.toICSString()));
 
     lines.push('END:VEVENT');
 

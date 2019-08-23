@@ -5,8 +5,10 @@ import Alarm from './entities/Alarm';
 
 export default class Calendar {
 
+    private _alarms: Alarm[];
     private _appointments: Appointment[];
     private _anniversaries: Anniversary[];
+    private _nextAlarmId: number;
     private _nextAppointmentId: number;
     private _nextAnniversaryId: number;
 
@@ -17,11 +19,11 @@ export default class Calendar {
     public prodid: string;
 
 
-    public get appointments(): Appointment[] {
-        return this._appointments;
+    public get alarms(): Alarm[] {
+        return this._alarms;
     }
-    public set appointments(appointments: Appointment[]) {
-        this._appointments = [...this._appointments, ...appointments];
+    public set alarms(alarms: Alarm[]) {
+        this._alarms = [...this._alarms, ...alarms];
     }
 
     public get anniversaries(): Anniversary[] {
@@ -31,6 +33,27 @@ export default class Calendar {
         this._anniversaries = [...this._anniversaries, ...anniversaries];
     }
 
+    public get appointments(): Appointment[] {
+        return this._appointments;
+    }
+    public set appointments(appointments: Appointment[]) {
+        this._appointments = [...this._appointments, ...appointments];
+    }
+
+    public get nextAlarmId(): number {
+        return this._nextAlarmId;
+    }
+    public set nextAlarmId(nextAlarmId: number) {
+        this._nextAlarmId = nextAlarmId;
+    }
+
+    public get nextAnniversaryId(): number {
+        return this._nextAnniversaryId;
+    }
+    public set nextAnniversaryId(nextAnniversaryId: number) {
+        this._nextAnniversaryId = nextAnniversaryId;
+    }
+
     public get nextAppointmentId(): number {
         return this._nextAppointmentId;
     }
@@ -38,20 +61,15 @@ export default class Calendar {
         this._nextAppointmentId = nextAppointmentId;
     }
 
-    public get annivernextAnniversaryIdsaries(): number {
-        return this._nextAnniversaryId;
-    }
-    public set nextAnniversaryId(nextAnniversaryId: number) {
-        this._nextAnniversaryId = nextAnniversaryId;
-    }
-
 
     public constructor(calName: string, prodId: string, calScale?: string, version?: string, method?: string) {
-        this._appointments = [];
+        this._alarms = [];
         this._anniversaries = [];
+        this._appointments = [];
 
-        this._nextAppointmentId = 0;
+        this._nextAlarmId = 0;
         this._nextAnniversaryId = 0;
+        this._nextAppointmentId = 0;
 
         this.name = calName;
         this.prodid = prodId;
@@ -61,11 +79,59 @@ export default class Calendar {
     }
 
 
-    public createAppointment(props: { [field: string]: string }, alarms: Alarm[] = []) {
+    public createAnniversary(event: { [field: string]: string }) {
+        const newId = this._nextAnniversaryId.toString();
+
+        const addedEvent = new Anniversary(`anniversary-${newId}`, event);
+
+        this._anniversaries.push(addedEvent);
+        this._nextAnniversaryId += 1;
+
+        return addedEvent;
+    }
+
+    public async updateAnniversary(id: string, data: any) {
+        const anniversary = this._anniversaries.find(entry => entry.id === `anniversary-${id}`);
+        let somethingUpdated = false;
+
+        if (anniversary) {
+            /// TODO: validate data input
+            if (data['date']) {
+                anniversary.date = data['date'];
+                somethingUpdated = true;
+            } if (data['name']) {
+                anniversary.name = data['name'];
+                somethingUpdated = true;
+            } if (data['description']) {
+                anniversary.description = data['description'];
+                somethingUpdated = true;
+            } if (data['organizer_name'] && data['organizer_email']) {
+                anniversary.organizer = { name: data['organizer_name'], email: data['organizer_email'] };
+                somethingUpdated = true;
+            }
+
+            if (somethingUpdated)
+                anniversary.lastModifiedDate = new Date().toISOString();
+        }
+
+        return somethingUpdated ? anniversary : undefined;
+    }
+
+    public removeAnniversary(id: string) {
+        const anniversaryToDelete = this._anniversaries.find(entry => entry.id === `anniversary-${id}`);
+
+        if (anniversaryToDelete) {
+            this._anniversaries = this._anniversaries.filter(entry => entry.id !== anniversaryToDelete.id);
+        }
+
+        return anniversaryToDelete;
+    }
+
+
+    public createAppointment(props: { [field: string]: string }) {
         const newId = this._nextAppointmentId.toString();
 
         const addedEvent = new Appointment(`appointment-${newId}`, props);
-        alarms.forEach(alarm => addedEvent.addAlarm(alarm));
 
         this._appointments.push(addedEvent);
         this._nextAppointmentId += 1;
@@ -110,55 +176,5 @@ export default class Calendar {
             this._appointments = this._appointments.filter(entry => entry.id !== appointmentToDelete.id);
 
         return appointmentToDelete;
-    }
-
-
-    public createAnniversary(event: { [field: string]: string }, alarms: Alarm[] = []) {
-        const newId = this._nextAnniversaryId.toString();
-
-        const addedEvent = new Anniversary(`anniversary-${newId}`, event);
-        alarms.forEach(alarm => addedEvent.addAlarm(alarm));
-
-        this._anniversaries.push(addedEvent);
-        this._nextAnniversaryId += 1;
-
-        return addedEvent;
-    }
-
-    public async updateAnniversary(id: string, data: any) {
-        const anniversary = this._anniversaries.find(entry => entry.id === `anniversary-${id}`);
-        let somethingUpdated = false;
-
-        if (anniversary) {
-            /// TODO: validate data input
-            if (data['date']) {
-                anniversary.date = data['date'];
-                somethingUpdated = true;
-            } if (data['name']) {
-                anniversary.name = data['name'];
-                somethingUpdated = true;
-            } if (data['description']) {
-                anniversary.description = data['description'];
-                somethingUpdated = true;
-            } if (data['organizer_name'] && data['organizer_email']) {
-                anniversary.organizer = { name: data['organizer_name'], email: data['organizer_email'] };
-                somethingUpdated = true;
-            }
-
-            if (somethingUpdated)
-                anniversary.lastModifiedDate = new Date().toISOString();
-        }
-
-        return somethingUpdated ? anniversary : undefined;
-    }
-
-    public removeAnniversary(id: string) {
-        const anniversaryToDelete = this._anniversaries.find(entry => entry.id === `anniversary-${id}`);
-
-        if (anniversaryToDelete) {
-            this._anniversaries = this._anniversaries.filter(entry => entry.id !== anniversaryToDelete.id);
-        }
-
-        return anniversaryToDelete;
     }
 }

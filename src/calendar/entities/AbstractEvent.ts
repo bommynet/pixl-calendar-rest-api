@@ -16,8 +16,6 @@ class AbstractCalendarEvent {
     public createdDate: string;
     public lastModifiedDate: string;
 
-    public alarms: Alarm[];
-
     constructor(id: string, props: { [field: string]: string }) {
         const missingFields = ['name', 'organizer_name', 'organizer_email'].filter(key => typeof props[key] === 'undefined');
 
@@ -38,12 +36,6 @@ class AbstractCalendarEvent {
         this.attendees = [];
         this.createdDate = timestamp;
         this.lastModifiedDate = timestamp;
-
-        this.alarms = [];
-    }
-
-    public addAlarm(alarm: Alarm): void {
-        this.alarms.push(alarm);
     }
 }
 
