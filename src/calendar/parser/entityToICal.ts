@@ -1,5 +1,6 @@
-import Appointment from "../entities/Appointment";
+import Alarm from "../entities/Alarm";
 import Anniversary from "../entities/Anniversary";
+import Appointment from "../entities/Appointment";
 import Calendar from "../Calendar";
 
 export function calendarToICal(calendar: Calendar): string {
@@ -21,36 +22,16 @@ export function calendarToICal(calendar: Calendar): string {
     return lines.join('\r\n');
 }
 
-export function appointmentToICal(appointment: Appointment): string {
+export function alarmToICal(alarm: Alarm): string {
     const lines: string[] = [
-        'BEGIN:VEVENT',
-        'TRANSP:TRANSPARENT',
-        'UID:' + appointment.id,
-        'DTSTAMP:' + appointment.begin,
-        'DTSTART;VALUE=DATE:' + appointment.begin,
-        'DTEND;VALUE=DATE:' + appointment.end,
-        'SUMMARY:' + appointment.name,
-        'CLASS:' + appointment.visibility,
-        'STATUS:' + appointment.status,
-        'SEQUENCE:' + appointment.sequence,
-        'CREATED:' + appointment.createdDate,
-        'LAST-MODIFIED:' + appointment.lastModifiedDate,
-        `ORGANIZER;CN=${appointment.organizer.name}:MAILTO:${appointment.organizer.email}`
+        'BEGIN:VALARM',
+        'X-WR-ALARMUID:' + alarm.id,
+        'UID:' + alarm.id,
+        'TRIGGER:' + alarm.trigger,
+        'DESCRIPTION:' + alarm.description,
+        'ACTION:' + alarm.action,
+        'END:VALARM',
     ];
-
-    // optional Entries
-    if (appointment.category)
-        lines.push('CATEGORIES:' + appointment.category);
-    if (appointment.description)
-        lines.push('DESCRIPTION:' + appointment.description);
-    if (appointment.location)
-        lines.push('LOCATION:' + appointment.location);
-
-    appointment.attendees.forEach(attendee => {
-        lines.push(`ATTENDEE;CN=${attendee.name}:MAILTO:${attendee.email}`);
-    });
-
-    lines.push('END:VEVENT');
 
     return lines.join('\r\n');
 }
@@ -83,6 +64,40 @@ export function anniversaryToICal(anniversary: Anniversary): string {
         lines.push('LOCATION:' + anniversary.location);
 
     anniversary.attendees.forEach(attendee => {
+        lines.push(`ATTENDEE;CN=${attendee.name}:MAILTO:${attendee.email}`);
+    });
+
+    lines.push('END:VEVENT');
+
+    return lines.join('\r\n');
+}
+
+export function appointmentToICal(appointment: Appointment): string {
+    const lines: string[] = [
+        'BEGIN:VEVENT',
+        'TRANSP:TRANSPARENT',
+        'UID:' + appointment.id,
+        'DTSTAMP:' + appointment.begin,
+        'DTSTART;VALUE=DATE:' + appointment.begin,
+        'DTEND;VALUE=DATE:' + appointment.end,
+        'SUMMARY:' + appointment.name,
+        'CLASS:' + appointment.visibility,
+        'STATUS:' + appointment.status,
+        'SEQUENCE:' + appointment.sequence,
+        'CREATED:' + appointment.createdDate,
+        'LAST-MODIFIED:' + appointment.lastModifiedDate,
+        `ORGANIZER;CN=${appointment.organizer.name}:MAILTO:${appointment.organizer.email}`
+    ];
+
+    // optional Entries
+    if (appointment.category)
+        lines.push('CATEGORIES:' + appointment.category);
+    if (appointment.description)
+        lines.push('DESCRIPTION:' + appointment.description);
+    if (appointment.location)
+        lines.push('LOCATION:' + appointment.location);
+
+    appointment.attendees.forEach(attendee => {
         lines.push(`ATTENDEE;CN=${attendee.name}:MAILTO:${attendee.email}`);
     });
 
