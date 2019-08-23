@@ -1,8 +1,8 @@
 import Appointment from "../entities/Appointment";
 import Anniversary from "../entities/Anniversary";
-import VCalendar from "../VCalendar";
+import Calendar from "../Calendar";
 
-export function calendarToICal(calendar:VCalendar):string {
+export function calendarToICal(calendar:Calendar):string {
     var lines: string[] = [
         'BEGIN:VCALENDAR',
         'CALSCALE:' + calendar.scale,

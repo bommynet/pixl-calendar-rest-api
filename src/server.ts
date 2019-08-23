@@ -1,14 +1,17 @@
 import express from 'express';
 
-import VCalendar from './iCal/VCalendar';
-import Appointment from './iCal/entities/Appointment';
-import Anniversary from './iCal/entities/Anniversary';
-import { calendarToICal } from './iCal/parser/entityToICal';
+import Storage from './storage/NodePersist';
+
+import Calendar from './calendar/Calendar';
+import Appointment from './calendar/entities/Appointment';
+import Anniversary from './calendar/entities/Anniversary';
+import { calendarToICal } from './calendar/parser/entityToICal';
 
 // prepare globals
 const app = express();
 const port = 22222;
-const iCal = new VCalendar('Bommys Kalender', '-//bommynet/pixlcal//NONSGML v1.0-alpha//DE');
+const iCal = new Calendar('Bommys Kalender', '-//bommynet/pixlcal//NONSGML v1.0-alpha//DE');
+const storage = new Storage();
 
 
 app.get('/api/calendar/sync', (req, res) => {
@@ -43,6 +46,8 @@ app.post('/api/calendar/appointment', (req, res) => {
 
     try {
         const appointment = iCal.createAppointment(req.query);
+        storage.store(appointment);
+        storage.updateConfig(iCal.nextAnniversaryId, iCal.nextAppointmentId);
         res.status(201).send(appointment);
     } catch (reason) {
         res.status(403).send(reason.message);
@@ -67,8 +72,11 @@ app.post('/api/calendar/appointment/:id', async (req, res) => {
         try {
             responseUpdatedObject = await iCal.updateAppointment(id, req.query);
 
-            if (responseUpdatedObject)
+
+            if (responseUpdatedObject) {
+                storage.store(responseUpdatedObject);
                 responseState = 200;
+            }
             else
                 responseState = 404;
         } catch (error) {
@@ -95,8 +103,10 @@ app.delete('/api/calendar/appointment/:id', (req, res) => {
     if (typeof id === 'string' && id.length > 0) {
         responseDeletedObject = iCal.removeAppointment(id);
 
-        if (responseDeletedObject)
+        if (responseDeletedObject) {
+            storage.store(responseDeletedObject);
             responseState = 200;
+        }
         else
             responseState = 404;
     }
@@ -127,6 +137,10 @@ app.post('/api/calendar/anniversary', (req, res) => {
 
     try {
         const anniverary = iCal.createAnniversary(req.query);
+
+        storage.store(anniverary);
+        storage.updateConfig(iCal.nextAnniversaryId, iCal.nextAppointmentId);
+
         res.status(201).send(anniverary);
     } catch (reason) {
         res.status(403).send(reason.message);
@@ -151,8 +165,10 @@ app.post('/api/calendar/anniversary/:id', async (req, res) => {
         try {
             responseUpdatedObject = await iCal.updateAnniversary(id, req.query);
 
-            if (responseUpdatedObject)
+            if (responseUpdatedObject) {
+                storage.store(responseUpdatedObject);
                 responseState = 200;
+            }
             else
                 responseState = 404;
         } catch (error) {
@@ -179,8 +195,10 @@ app.delete('/api/calendar/anniversary/:id', (req, res) => {
     if (typeof id === 'string' && id.length > 0) {
         responseDeletedObject = iCal.removeAnniversary(id);
 
-        if (responseDeletedObject)
+        if (responseDeletedObject) {
+            storage.delete(responseDeletedObject);
             responseState = 200;
+        }
         else
             responseState = 404;
     }
@@ -188,4 +206,30 @@ app.delete('/api/calendar/anniversary/:id', (req, res) => {
     res.status(responseState).send(responseDeletedObject);
 })
 
-app.listen(port, () => console.log(`Application started at ${port}`));
+
+// setup storage
+storage.init()
+    .then((config) => {
+        iCal.nextAppointmentId = config.appointmentId;
+        iCal.nextAnniversaryId = config.anniversaryId;
+        console.log('Storage ready');
+    })
+    .then(() => {
+        console.log('Storage: load all anniversaries');
+        return storage.loadAllAnniversaries();
+    })
+    .then((anniversaries) => {
+        iCal.anniversaries = anniversaries;
+        console.log(`  - ${anniversaries.length} loaded.`);
+        console.log('Storage: load all appointments');
+        return storage.loadAllAppointments();
+    })
+    .then((appointments) => {
+        iCal.appointments = appointments;
+        console.log(`  - ${appointments.length} loaded.`);
+    })
+    .then(() => {
+        app.listen(port, () => console.log(`Application started at ${port}`));
+    })
+    .catch(console.error);
+

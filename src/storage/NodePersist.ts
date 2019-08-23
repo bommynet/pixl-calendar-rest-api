@@ -1,7 +1,7 @@
 import storage from 'node-persist';
 import { CalendarConfig } from '../types';
-import Appointment from '../iCal/entities/Appointment';
-import Anniversary from '../iCal/entities/Anniversary';
+import Appointment from '../calendar/entities/Appointment';
+import Anniversary from '../calendar/entities/Anniversary';
 
 const KEY_CONFIG_FILE = '__config';
 

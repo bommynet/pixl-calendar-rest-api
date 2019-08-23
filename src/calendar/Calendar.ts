@@ -2,12 +2,8 @@ import Appointment from './entities/Appointment';
 import Anniversary from './entities/Anniversary';
 import Alarm from './entities/Alarm';
 
-import Storage from '../storage/NodePersist';
 
-
-export default class VCalendar {
-
-    private _storage: Storage;
+export default class Calendar {
 
     private _appointments: Appointment[];
     private _anniversaries: Anniversary[];
@@ -24,14 +20,33 @@ export default class VCalendar {
     public get appointments(): Appointment[] {
         return this._appointments;
     }
+    public set appointments(appointments: Appointment[]) {
+        this._appointments = [...this._appointments, ...appointments];
+    }
+
     public get anniversaries(): Anniversary[] {
         return this._anniversaries;
+    }
+    public set anniversaries(anniversaries: Anniversary[]) {
+        this._anniversaries = [...this._anniversaries, ...anniversaries];
+    }
+
+    public get nextAppointmentId(): number {
+        return this._nextAppointmentId;
+    }
+    public set nextAppointmentId(nextAppointmentId: number) {
+        this._nextAppointmentId = nextAppointmentId;
+    }
+
+    public get annivernextAnniversaryIdsaries(): number {
+        return this._nextAnniversaryId;
+    }
+    public set nextAnniversaryId(nextAnniversaryId: number) {
+        this._nextAnniversaryId = nextAnniversaryId;
     }
 
 
     public constructor(calName: string, prodId: string, calScale?: string, version?: string, method?: string) {
-        this._storage = new Storage();
-
         this._appointments = [];
         this._anniversaries = [];
 
@@ -43,30 +58,6 @@ export default class VCalendar {
         this.scale = calScale || 'GREGORIAN';
         this.version = version || '2.0';
         this.method = method || 'PUBLISH';
-
-
-        // setup storage
-        this._storage.init()
-            .then((config) => {
-                this._nextAppointmentId = config.appointmentId;
-                this._nextAnniversaryId = config.anniversaryId;
-                console.log('Storage ready');
-            })
-            .then(() => {
-                console.log('Storage: load all anniversaries');
-                return this._storage.loadAllAnniversaries();
-            })
-            .then((anniversaries) => {
-                this._anniversaries = anniversaries;
-                console.log(`  - ${anniversaries.length} loaded.`);
-                console.log('Storage: load all appointments');
-                return this._storage.loadAllAppointments();
-            })
-            .then((appointments) => {
-                this._appointments = appointments;
-                console.log(`  - ${appointments.length} loaded.`);
-            })
-            .catch(console.error);
     }
 
 
@@ -78,10 +69,6 @@ export default class VCalendar {
 
         this._appointments.push(addedEvent);
         this._nextAppointmentId += 1;
-
-        // setup storage
-        this._storage.store(addedEvent);
-        this._storage.updateConfig(this._nextAnniversaryId, this._nextAppointmentId);
 
         return addedEvent;
     }
@@ -109,16 +96,8 @@ export default class VCalendar {
                 somethingUpdated = true;
             }
 
-            if (somethingUpdated) {
+            if (somethingUpdated)
                 appointment.lastModifiedDate = new Date().toISOString();
-
-                try {
-                    await this._storage.store(appointment);
-                    console.log('Storage: updated', appointment.id);
-                } catch (error) {
-                    console.error(error);
-                }
-            }
         }
 
         return somethingUpdated ? appointment : undefined;
@@ -127,10 +106,8 @@ export default class VCalendar {
     public removeAppointment(id: string) {
         const appointmentToDelete = this._appointments.find(entry => entry.id === `appointment-${id}`);
 
-        if (appointmentToDelete) {
+        if (appointmentToDelete)
             this._appointments = this._appointments.filter(entry => entry.id !== appointmentToDelete.id);
-            this._storage.delete(appointmentToDelete);
-        }
 
         return appointmentToDelete;
     }
@@ -144,10 +121,6 @@ export default class VCalendar {
 
         this._anniversaries.push(addedEvent);
         this._nextAnniversaryId += 1;
-
-        // setup storage
-        this._storage.store(addedEvent);
-        this._storage.updateConfig(this._nextAnniversaryId, this._nextAppointmentId);
 
         return addedEvent;
     }
@@ -172,16 +145,8 @@ export default class VCalendar {
                 somethingUpdated = true;
             }
 
-            if (somethingUpdated){
+            if (somethingUpdated)
                 anniversary.lastModifiedDate = new Date().toISOString();
-
-                try {
-                    await this._storage.store(anniversary);
-                    console.log('Storage: updated', anniversary.id);
-                } catch (error) {
-                    console.error(error);
-                }
-            }
         }
 
         return somethingUpdated ? anniversary : undefined;
@@ -192,7 +157,6 @@ export default class VCalendar {
 
         if (anniversaryToDelete) {
             this._anniversaries = this._anniversaries.filter(entry => entry.id !== anniversaryToDelete.id);
-            this._storage.delete(anniversaryToDelete);
         }
 
         return anniversaryToDelete;
