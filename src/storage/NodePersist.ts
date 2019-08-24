@@ -2,6 +2,7 @@ import storage from 'node-persist';
 import { CalendarConfig } from '../types';
 import Appointment from '../calendar/entities/Appointment';
 import Anniversary from '../calendar/entities/Anniversary';
+import Alarm from '../calendar/entities/Alarm';
 
 const KEY_CONFIG_FILE = '__config';
 
@@ -10,18 +11,19 @@ class NodePersist {
     public async init(): Promise<CalendarConfig> {
         await storage.init();
 
-        let config: CalendarConfig;
+        let config: CalendarConfig = { alarmId: 0, anniversaryId: 0, appointmentId: 0 };
         try {
             config = await storage.get(KEY_CONFIG_FILE);
         } catch (e) {
-            config = { anniversaryId: 0, appointmentId: 0 };
+            // nothing to do here
+            console.log('config file does not exists - use default values')
         }
 
-        return !!config ? config : { anniversaryId: 0, appointmentId: 0 };
+        return config;
     }
 
-    public async updateConfig(anniversaryId: number, appointmentId: number): Promise<void> {
-        return await storage.set(KEY_CONFIG_FILE, { anniversaryId, appointmentId });
+    public async updateConfig(alarmId:number, anniversaryId: number, appointmentId: number): Promise<void> {
+        return await storage.set(KEY_CONFIG_FILE, { alarmId, anniversaryId, appointmentId });
     }
 
     public async store(entity: any): Promise<void> {
@@ -40,6 +42,10 @@ class NodePersist {
 
     public async read(id: string): Promise<any> {
         return await storage.get(id);
+    }
+
+    public async loadAllAlarms(): Promise<Alarm[]> {
+        return await storage.valuesWithKeyMatch(/alarm/);
     }
 
     public async loadAllAppointments(): Promise<Appointment[]> {

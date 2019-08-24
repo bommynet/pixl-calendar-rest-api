@@ -4,6 +4,7 @@ export interface iCalPersonObject {
 }
 
 export interface CalendarConfig {
-    appointmentId: number;
+    alarmId: number;
     anniversaryId: number;
+    appointmentId: number;
 }

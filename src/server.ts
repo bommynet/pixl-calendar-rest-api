@@ -47,7 +47,7 @@ app.post('/api/calendar/appointment', (req, res) => {
     try {
         const appointment = iCal.createAppointment(req.query);
         storage.store(appointment);
-        storage.updateConfig(iCal.nextAnniversaryId, iCal.nextAppointmentId);
+        storage.updateConfig(iCal.nextAlarmId, iCal.nextAnniversaryId, iCal.nextAppointmentId);
         res.status(201).send(appointment);
     } catch (reason) {
         res.status(403).send(reason.message);
@@ -139,7 +139,7 @@ app.post('/api/calendar/anniversary', (req, res) => {
         const anniverary = iCal.createAnniversary(req.query);
 
         storage.store(anniverary);
-        storage.updateConfig(iCal.nextAnniversaryId, iCal.nextAppointmentId);
+        storage.updateConfig(iCal.nextAlarmId, iCal.nextAnniversaryId, iCal.nextAppointmentId);
 
         res.status(201).send(anniverary);
     } catch (reason) {
@@ -227,6 +227,12 @@ storage.init()
     .then((appointments) => {
         iCal.appointments = appointments;
         console.log(`  - ${appointments.length} loaded.`);
+        console.log('Storage: load all alarms');
+        return storage.loadAllAlarms();
+    })
+    .then((alarms) => {
+        iCal.alarms = alarms;
+        console.log(`  - ${alarms.length} loaded.`);
     })
     .then(() => {
         app.listen(port, () => console.log(`Application started at ${port}`));
