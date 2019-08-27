@@ -43,7 +43,7 @@ app.get("/api/calendar/appointment", cors(), (req, res) => {
  *  - (201) created appointment
  *  - (403) error message
  */
-app.post("/api/calendar/appointment", (req, res) => {
+app.post("/api/calendar/appointment", cors(), (req, res) => {
   console.log("Appointment-Add");
 
   try {
@@ -67,9 +67,9 @@ app.post("/api/calendar/appointment", (req, res) => {
  *  - (403) id is not valid
  *  - (404) appointment not found
  */
-app.post("/api/calendar/appointment/:id", async (req, res) => {
+app.post("/api/calendar/appointment/:id", cors(), async (req, res) => {
   const id = "" + req.params["id"];
-  console.log(`Appointment-Update: ${id}`);
+  console.log(`Appointment-Update: ${id}`, { req });
 
   let responseState = 403;
   let responseUpdatedObject: Appointment | undefined;
@@ -81,7 +81,9 @@ app.post("/api/calendar/appointment/:id", async (req, res) => {
       if (responseUpdatedObject) {
         storage.store(responseUpdatedObject);
         responseState = 200;
-      } else responseState = 404;
+      } else {
+        responseState = 404;
+      }
     } catch (error) {
       responseState = 500;
     }
@@ -97,7 +99,7 @@ app.post("/api/calendar/appointment/:id", async (req, res) => {
  *  - (403) id is not valid
  *  - (404) appointment not found
  */
-app.delete("/api/calendar/appointment/:id", (req, res) => {
+app.delete("/api/calendar/appointment/:id", cors(), (req, res) => {
   const id: string = "" + req.params["id"];
 
   let responseState = 403;
@@ -120,7 +122,7 @@ app.delete("/api/calendar/appointment/:id", (req, res) => {
  * response:
  *  - (200) a list of all anniversaries
  */
-app.get("/api/calendar/anniversary", (req, res) => {
+app.get("/api/calendar/anniversary", cors(), (req, res) => {
   console.log("Anniversary-Read by", req.ip);
 
   res.status(200).send(iCal.anniversaries);
@@ -132,7 +134,7 @@ app.get("/api/calendar/anniversary", (req, res) => {
  *  - (201) created anniversary
  *  - (403) error message
  */
-app.post("/api/calendar/anniversary", (req, res) => {
+app.post("/api/calendar/anniversary", cors(), (req, res) => {
   console.log("Anniversary-Add by", req.ip);
 
   try {
@@ -158,7 +160,7 @@ app.post("/api/calendar/anniversary", (req, res) => {
  *  - (403) id is not valid
  *  - (404) anniversary not found
  */
-app.post("/api/calendar/anniversary/:id", async (req, res) => {
+app.post("/api/calendar/anniversary/:id", cors(), async (req, res) => {
   const id = "" + req.params["id"];
   console.log(`Anniversary-Update: ${id}`);
 
@@ -188,7 +190,7 @@ app.post("/api/calendar/anniversary/:id", async (req, res) => {
  *  - (403) id is not valid
  *  - (404) anniversary not found
  */
-app.delete("/api/calendar/anniversary/:id", (req, res) => {
+app.delete("/api/calendar/anniversary/:id", cors(), (req, res) => {
   const id: string = "" + req.params["id"];
 
   let responseState = 403;
