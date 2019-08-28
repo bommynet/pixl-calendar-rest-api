@@ -69,7 +69,7 @@ class NodePersist {
             console.log("config file does not exists - use default values");
         }
 
-        return config;
+        return config || { alarmId: 0, anniversaryId: 0, appointmentId: 0 };
     }
 
     public async updateConfig(config: {
@@ -86,6 +86,8 @@ class NodePersist {
             _config = { alarmId: 0, anniversaryId: 0, appointmentId: 0 };
         }
 
+        _config = _config || { alarmId: 0, anniversaryId: 0, appointmentId: 0 };
+
         // update values
         if (config.alarmId) _config.alarmId = config.alarmId;
         if (config.anniversaryId) _config.anniversaryId = config.anniversaryId;
@@ -99,9 +101,9 @@ class NodePersist {
     }
 
     public async _store(entity: any): Promise<void> {
-        if (typeof entity["id"] === "undefined") throw new TypeError("entities without 'id' are not storable");
+        if (typeof entity["longId"] === "undefined") throw new TypeError("entities without 'longId' are not storable");
 
-        return await storage.set(entity["id"], entity);
+        return await storage.set(entity["longId"], entity);
     }
 
     public delete(entity: any): void {
@@ -109,9 +111,9 @@ class NodePersist {
     }
 
     public async _delete(entity: any): Promise<void> {
-        if (typeof entity["id"] === "undefined") throw new TypeError("entities without 'id' are not deletable");
+        if (typeof entity["longId"] === "undefined") throw new TypeError("entities without 'longId' are not deletable");
 
-        return await storage.del(entity["id"]);
+        return await storage.del(entity["longId"]);
     }
 
     public async read(id: string): Promise<any> {
