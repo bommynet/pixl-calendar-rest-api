@@ -1,5 +1,5 @@
 import express from "express";
-import cors from "cors";
+import bodyParser from "body-parser";
 
 import Storage from "./storage/NodePersist";
 
@@ -26,6 +26,15 @@ const storage = new Storage();
 //     res.send(iCalString);
 // });
 
+// setup express
+app.use(bodyParser.json());
+
+app.use(function(req, res, next) {
+    res.setHeader("Access-Control-Allow-Origin", "*");
+    res.setHeader("Access-Control-Allow-Headers", "Origin, X-Request-With, Content-Type, Accept");
+    next();
+});
+
 // setup storage
 storage
     .init()
@@ -34,8 +43,8 @@ storage
         return config;
     })
     .then((config) => {
-        appointments(app, cors, storage, config.appointmentId);
-        anniversaries(app, cors, storage, config.anniversaryId);
+        appointments(app, storage, config.appointmentId);
+        anniversaries(app, storage, config.anniversaryId);
         console.log("Routes ready");
     })
     .then(() => {
