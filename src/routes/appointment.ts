@@ -1,6 +1,6 @@
 import Appointment from "../calendar/entities/Appointment";
 
-export default (app, cors, storage, nextId = 0) => {
+export default (app, storage, nextId = 0) => {
     let nextAppointmentId = nextId;
 
     /**
@@ -9,7 +9,7 @@ export default (app, cors, storage, nextId = 0) => {
      *  - (200) a list of all appointments
      *  - (500) error loading appointments
      */
-    app.get("/api/calendar/appointment", cors(), (req, res) => {
+    app.get("/api/calendar/appointment", (req, res) => {
         console.log("Appointment-ReadAll");
 
         storage
@@ -24,13 +24,13 @@ export default (app, cors, storage, nextId = 0) => {
      *  - (202) created appointment
      *  - (403) error message
      */
-    app.post("/api/calendar/appointment", cors(), (req, res) => {
+    app.post("/api/calendar/appointment", (req, res) => {
         console.log("Appointment-Add");
 
         const currentId = nextAppointmentId;
         nextAppointmentId += 1;
 
-        const appointment = new Appointment("appointment-" + currentId, req.query);
+        const appointment = new Appointment(currentId, req.query);
 
         try {
             storage.store(appointment);
@@ -48,11 +48,11 @@ export default (app, cors, storage, nextId = 0) => {
      *  - (403) id is not valid
      *  - (404) appointment not found
      */
-    app.post("/api/calendar/appointment/:id", cors(), async (req, res) => {
+    app.post("/api/calendar/appointment/:id", async (req, res) => {
         const id = req.params["id"];
-        console.log(`Appointment-Update: ${id}`, { req });
+        console.log(`Appointment-Update: ${id}`, { params: req.params, query: req.query, body: req.body });
 
-        const newData = req.query;
+        const newData = req.body;
 
         let responseState = 403;
         let responseData: any;
@@ -60,23 +60,21 @@ export default (app, cors, storage, nextId = 0) => {
         if (typeof id === "string" && id.length > 0) {
             const appointmentId = "appointment-" + id;
 
-            storage
-                .read(appointmentId)
-                .then((loadedData) => {
-                    const updatedData = {
-                        ...loadedData,
-                        ...newData,
-                        id: appointmentId,
-                    };
+            try {
+                const loadedData = await storage.read(appointmentId);
 
-                    storage.store(updatedData);
-                    responseState = 202;
-                    responseData = updatedData;
-                })
-                .catch((error) => {
-                    responseState = 404;
-                    responseData = error;
-                });
+                const updatedData = {
+                    ...loadedData,
+                    ...newData,
+                };
+
+                storage.store(updatedData);
+                responseState = 202;
+                responseData = updatedData;
+            } catch (error) {
+                responseState = 404;
+                responseData;
+            }
         }
 
         res.status(responseState).send(responseData);
@@ -89,7 +87,7 @@ export default (app, cors, storage, nextId = 0) => {
      *  - (403) id is not valid
      *  - (404) appointment not found
      */
-    app.delete("/api/calendar/appointment/:id", cors(), (req, res) => {
+    app.delete("/api/calendar/appointment/:id", async (req, res) => {
         const id: string = "" + req.params["id"];
 
         let responseState = 403;
@@ -98,18 +96,16 @@ export default (app, cors, storage, nextId = 0) => {
         if (typeof id === "string" && id.length > 0) {
             const appointmentId = "appointment-" + id;
 
-            storage
-                .read(appointmentId)
-                .then((appointment) => {
-                    storage.delete(appointment);
+            try {
+                const appointment = await storage.read(appointmentId);
+                storage.delete(appointment);
 
-                    responseState = 202;
-                    responseData = appointment;
-                })
-                .catch((error) => {
-                    responseState = 404;
-                    responseData = error;
-                });
+                responseState = 202;
+                responseData = appointment;
+            } catch (error) {
+                responseState = 404;
+                responseData = error;
+            }
         }
 
         res.status(responseState).send(responseData);
