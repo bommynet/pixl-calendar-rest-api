@@ -80,9 +80,9 @@ export default class Calendar {
 
 
     public createAnniversary(event: { [field: string]: string }) {
-        const newId = this._nextAnniversaryId.toString();
+        const newId = this._nextAnniversaryId;
 
-        const addedEvent = new Anniversary(`anniversary-${newId}`, event);
+        const addedEvent = new Anniversary(newId, event);
 
         this._anniversaries.push(addedEvent);
         this._nextAnniversaryId += 1;
@@ -91,7 +91,7 @@ export default class Calendar {
     }
 
     public async updateAnniversary(id: string, data: any) {
-        const anniversary = this._anniversaries.find(entry => entry.id === `anniversary-${id}`);
+        const anniversary = this._anniversaries.find(entry => entry.id === id);
         let somethingUpdated = false;
 
         if (anniversary) {
@@ -118,7 +118,7 @@ export default class Calendar {
     }
 
     public removeAnniversary(id: string) {
-        const anniversaryToDelete = this._anniversaries.find(entry => entry.id === `anniversary-${id}`);
+        const anniversaryToDelete = this._anniversaries.find(entry => entry.id === id);
 
         if (anniversaryToDelete) {
             this._anniversaries = this._anniversaries.filter(entry => entry.id !== anniversaryToDelete.id);
@@ -129,9 +129,9 @@ export default class Calendar {
 
 
     public createAppointment(props: { [field: string]: string }) {
-        const newId = this._nextAppointmentId.toString();
+        const newId = this._nextAppointmentId;
 
-        const addedEvent = new Appointment(`appointment-${newId}`, props);
+        const addedEvent = new Appointment(newId, props);
 
         this._appointments.push(addedEvent);
         this._nextAppointmentId += 1;
@@ -140,7 +140,7 @@ export default class Calendar {
     }
 
     public async updateAppointment(id: string, data: any) {
-        const appointment = this._appointments.find(entry => entry.id === `appointment-${id}`);
+        const appointment = this._appointments.find(entry => entry.id === id);
         let somethingUpdated = false;
 
         if (appointment) {
@@ -170,7 +170,7 @@ export default class Calendar {
     }
 
     public removeAppointment(id: string) {
-        const appointmentToDelete = this._appointments.find(entry => entry.id === `appointment-${id}`);
+        const appointmentToDelete = this._appointments.find(entry => entry.id === id);
 
         if (appointmentToDelete)
             this._appointments = this._appointments.filter(entry => entry.id !== appointmentToDelete.id);
