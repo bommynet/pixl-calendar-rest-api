@@ -1,6 +1,6 @@
 import Anniversary from "../calendar/entities/Anniversary";
 
-export default (app, cors, storage, nextId = 0) => {
+export default (app, storage, nextId = 0) => {
     let nextAnniversaryId = nextId;
 
     /**
@@ -9,11 +9,11 @@ export default (app, cors, storage, nextId = 0) => {
      *  - (200) a list of all anniversaries
      *  - (500) error loading anniversaries
      */
-    app.get("/api/calendar/anniversary", cors(), (req, res) => {
+    app.get("/api/calendar/anniversary", (req, res) => {
         console.log("Anniversary-ReadAll");
 
         storage
-            .loadAllAnniversarys()
+            .loadAllAnniversaries()
             .then((anniversaries) => res.status(200).send(anniversaries))
             .catch((error) => res.status(500).send(error));
     });
@@ -24,13 +24,13 @@ export default (app, cors, storage, nextId = 0) => {
      *  - (202) created anniversary
      *  - (403) error message
      */
-    app.post("/api/calendar/anniversary", cors(), (req, res) => {
+    app.post("/api/calendar/anniversary", (req, res) => {
         console.log("Anniversary-Add");
 
         const currentId = nextAnniversaryId;
         nextAnniversaryId += 1;
 
-        const anniversary = new Anniversary("anniversary-" + currentId, req.query);
+        const anniversary = new Anniversary(currentId, req.query);
 
         try {
             storage.store(anniversary);
@@ -48,11 +48,11 @@ export default (app, cors, storage, nextId = 0) => {
      *  - (403) id is not valid
      *  - (404) anniversary not found
      */
-    app.post("/api/calendar/anniversary/:id", cors(), async (req, res) => {
+    app.post("/api/calendar/anniversary/:id", async (req, res) => {
         const id = req.params["id"];
-        console.log(`Anniversary-Update: ${id}`, { req });
+        console.log(`Anniversary-Update: ${id}`, { params: req.params, query: req.query, body: req.body });
 
-        const newData = req.query;
+        const newData = req.body;
 
         let responseState = 403;
         let responseData: any;
@@ -60,23 +60,21 @@ export default (app, cors, storage, nextId = 0) => {
         if (typeof id === "string" && id.length > 0) {
             const anniversaryId = "anniversary-" + id;
 
-            storage
-                .read(anniversaryId)
-                .then((loadedData) => {
-                    const updatedData = {
-                        ...loadedData,
-                        ...newData,
-                        id: anniversaryId,
-                    };
+            try {
+                const loadedData = await storage.read(anniversaryId);
 
-                    storage.store(updatedData);
-                    responseState = 202;
-                    responseData = updatedData;
-                })
-                .catch((error) => {
-                    responseState = 404;
-                    responseData = error;
-                });
+                const updatedData = {
+                    ...loadedData,
+                    ...newData,
+                };
+
+                storage.store(updatedData);
+                responseState = 202;
+                responseData = updatedData;
+            } catch (error) {
+                responseState = 404;
+                responseData;
+            }
         }
 
         res.status(responseState).send(responseData);
@@ -89,7 +87,7 @@ export default (app, cors, storage, nextId = 0) => {
      *  - (403) id is not valid
      *  - (404) anniversary not found
      */
-    app.delete("/api/calendar/anniversary/:id", cors(), (req, res) => {
+    app.delete("/api/calendar/anniversary/:id", async (req, res) => {
         const id: string = "" + req.params["id"];
 
         let responseState = 403;
@@ -98,18 +96,16 @@ export default (app, cors, storage, nextId = 0) => {
         if (typeof id === "string" && id.length > 0) {
             const anniversaryId = "anniversary-" + id;
 
-            storage
-                .read(anniversaryId)
-                .then((anniversary) => {
-                    storage.delete(anniversary);
+            try {
+                const anniversary = await storage.read(anniversaryId);
+                storage.delete(anniversary);
 
-                    responseState = 202;
-                    responseData = anniversary;
-                })
-                .catch((error) => {
-                    responseState = 404;
-                    responseData = error;
-                });
+                responseState = 202;
+                responseData = anniversary;
+            } catch (error) {
+                responseState = 404;
+                responseData = error;
+            }
         }
 
         res.status(responseState).send(responseData);
