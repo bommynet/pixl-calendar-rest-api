@@ -36,6 +36,8 @@ app.use(function(req, res, next) {
     next();
 });
 
+app.use("/calendar", express.static("client"));
+
 // setup storage
 storage
     .init()
