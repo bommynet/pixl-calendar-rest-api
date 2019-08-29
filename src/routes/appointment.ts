@@ -30,7 +30,7 @@ export default (app, storage, nextId = 0) => {
         const currentId = nextAppointmentId;
         nextAppointmentId += 1;
 
-        const appointment = new Appointment(currentId, req.query);
+        const appointment = new Appointment(currentId, req.body);
 
         try {
             storage.store(appointment);
