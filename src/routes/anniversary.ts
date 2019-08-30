@@ -30,7 +30,7 @@ export default (app, storage, nextId = 0) => {
         const currentId = nextAnniversaryId;
         nextAnniversaryId += 1;
 
-        const anniversary = new Anniversary(currentId, req.query);
+        const anniversary = new Anniversary(currentId, req.body);
 
         try {
             storage.store(anniversary);

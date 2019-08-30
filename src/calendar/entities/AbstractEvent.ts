@@ -1,7 +1,6 @@
 import Alarm from "./Alarm";
 import { iCalPersonObject } from "../../types";
 
-
 class AbstractCalendarEvent {
     public id: string;
     public name: string;
@@ -17,22 +16,26 @@ class AbstractCalendarEvent {
     public lastModifiedDate: string;
 
     constructor(id: string, props: { [field: string]: string }) {
-        const missingFields = ['name', 'organizer_name', 'organizer_email'].filter(key => typeof props[key] === 'undefined');
+        const missingFields = ["name", "organizer_name", "organizer_email"].filter(
+            (key) => typeof props[key] === "undefined",
+        );
 
         if (missingFields.length > 0)
-            throw new TypeError(`[AbstractEvent] One or more fields are missing in "props": ${missingFields.join(',')}`);
+            throw new TypeError(
+                `[AbstractEvent] One or more fields are missing in "props": ${missingFields.join(", ")}`,
+            );
 
         const timestamp = new Date().toISOString();
 
         this.id = id;
-        this.name = props['name'];
-        this.description = props['description'];
-        this.location = props['location'];
-        this.visibility = props['visibility'] || 'PUBLIC';
-        this.status = 'CONFIRMED';
+        this.name = props["name"];
+        this.description = props["description"];
+        this.location = props["location"];
+        this.visibility = props["visibility"] || "PUBLIC";
+        this.status = "CONFIRMED";
         this.sequence = 0;
-        this.category = props['category'];
-        this.organizer = { name: props['organizer_name'], email: props['organizer_email'] };
+        this.category = props["category"];
+        this.organizer = { name: props["organizer_name"], email: props["organizer_email"] };
         this.attendees = [];
         this.createdDate = timestamp;
         this.lastModifiedDate = timestamp;

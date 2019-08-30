@@ -4,10 +4,10 @@ import bodyParser from "body-parser";
 import Storage from "./storage/NodePersist";
 
 import appointments from "./routes/appointment";
+import anniversaries from "./routes/anniversary";
 
 // import Calendar from "./calendar/Calendar";
 // import { calendarToICal } from "./calendar/parser/entityToICal";
-import anniversaries from "./routes/anniversary";
 
 // prepare globals
 const app = express();
