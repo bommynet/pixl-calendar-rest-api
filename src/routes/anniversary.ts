@@ -66,6 +66,7 @@ export default (app, storage, nextId = 0) => {
                 const updatedData = {
                     ...loadedData,
                     ...newData,
+                    sequence: Number.parseInt(loadedData["sequence"]) + 1,
                 };
 
                 storage.store(updatedData);
