@@ -7,57 +7,6 @@ import Alarm from "../calendar/entities/Alarm";
 const KEY_CONFIG_FILE = "__config";
 
 class NodePersist {
-    private _queueIsWorking: boolean = false;
-    private _queue: { action: string; entry: any }[] = [];
-
-    private _addJob(action: string, entry: any): void {
-        this._queue.push({ action, entry });
-        this._runQueue();
-    }
-
-    private _getJob(): { action: string; entry: any } | undefined {
-        return this._queue.shift();
-    }
-
-    private async _doJob(job: { action: string; entry: any }): Promise<void> {
-        let jobFunction: ((entry: any) => Promise<void>) | undefined;
-
-        if (job.action === "store") jobFunction = this._store;
-        else if (job.action === "delete") jobFunction = this._delete;
-
-        if (!jobFunction) return;
-
-        try {
-            await jobFunction(job.entry);
-        } catch (error) {
-            console.error(`a job failed (action: ${job.action}, id:${job.entry["id"]})`);
-        }
-    }
-
-    private _runQueue() {
-        // no need to start, if queue is running already
-        if (this._queueIsWorking) return;
-
-        // no need to start, if queue is empty
-        if (this._queue.length <= 0) return;
-
-        this._queueIsWorking = true;
-
-        const queueWorkingLoop = async () => {
-            const job = this._getJob();
-
-            if (!job) {
-                this._queueIsWorking = false;
-                return;
-            }
-
-            await this._doJob(job);
-            queueWorkingLoop();
-        };
-
-        queueWorkingLoop();
-    }
-
     public async init(): Promise<CalendarConfig> {
         await storage.init();
 
@@ -96,21 +45,13 @@ class NodePersist {
         return await storage.set(KEY_CONFIG_FILE, _config);
     }
 
-    public store(entity: any): void {
-        this._addJob("store", entity);
-    }
-
-    public async _store(entity: any): Promise<void> {
+    public async store(entity: any): Promise<void> {
         if (typeof entity["longId"] === "undefined") throw new TypeError("entities without 'longId' are not storable");
 
         return await storage.set(entity["longId"], entity);
     }
 
-    public delete(entity: any): void {
-        this._addJob("delete", entity);
-    }
-
-    public async _delete(entity: any): Promise<void> {
+    public async delete(entity: any): Promise<void> {
         if (typeof entity["longId"] === "undefined") throw new TypeError("entities without 'longId' are not deletable");
 
         return await storage.del(entity["longId"]);
