@@ -2,6 +2,7 @@ import express from "express";
 import bodyParser from "body-parser";
 
 import setupCalendar from "./calendar";
+import setupProgress from "./progress";
 
 // prepare globals
 const app = express();
@@ -18,7 +19,7 @@ app.use(function(req, res, next) {
 });
 
 // setup storage
-Promise.all([setupCalendar(app)])
+Promise.all([setupCalendar(app), setupProgress(app)])
     .then(() => {
         // start http server on given port
         app.listen(port, () => console.log(`Application started at ${port}`));

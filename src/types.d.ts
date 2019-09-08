@@ -8,3 +8,7 @@ export interface CalendarConfig {
     anniversaryId: number;
     appointmentId: number;
 }
+
+export interface ProgressConfig {
+    entryId: number;
+}
