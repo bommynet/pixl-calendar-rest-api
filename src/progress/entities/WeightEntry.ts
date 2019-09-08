@@ -32,15 +32,19 @@ export default class WeightEntry {
     public note: string;
 
     constructor(id: number, props: WeightEntryProps) {
-        if (typeof id === "undefined") throw new TypeError("id has to be defined");
+        const errors: string[] = [];
+
+        if (typeof id === "undefined") errors.push("id has to be defined");
 
         if (typeof props.weight !== "number" || props.weight < 0)
-            throw new TypeError("weight has to be defined as positive integer");
+            errors.push("weight has to be defined as positive integer");
 
         if (typeof props.person !== "string" || props.person.length <= 0)
-            throw new TypeError("person has to be defined as non-empty string");
+            errors.push("person has to be defined as non-empty string");
 
-        if (typeof id === "undefined") throw new TypeError("id has to be defined");
+        if (typeof id === "undefined") errors.push("id has to be defined");
+
+        if (errors.length > 0) throw new TypeError(errors.join(", "));
 
         this.id = id;
         this.longId = "weight-" + id;
