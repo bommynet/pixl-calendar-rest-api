@@ -58,15 +58,14 @@ export default (app, storage, nextId = 0) => {
         let responseData: any;
 
         try {
-            // const loadedData = await storage.read(appointmentId);
-            // const updatedData = {
-            //     ...loadedData,
-            //     ...newData,
-            //     sequence: Number.parseInt(loadedData["sequence"]) + 1,
-            // };
-            // storage.store(updatedData);
-            // responseState = 202;
-            // responseData = updatedData;
+            const loadedData = await storage.read(longId);
+            const updatedData = {
+                ...loadedData,
+                ...newData,
+            };
+            storage.store(updatedData);
+            responseState = 202;
+            responseData = updatedData;
         } catch (error) {
             responseState = 404;
             responseData;
@@ -89,10 +88,10 @@ export default (app, storage, nextId = 0) => {
         let responseData: any;
 
         try {
-            // const appointment = await storage.read(appointmentId);
-            // storage.delete(appointment);
-            // responseState = 202;
-            // responseData = appointment;
+            const entry = await storage.read(longId);
+            storage.delete(entry);
+            responseState = 202;
+            responseData = entry;
         } catch (error) {
             responseState = 404;
             responseData = error;
