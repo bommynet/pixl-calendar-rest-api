@@ -1,7 +1,7 @@
 {
-    "name": "pixl-calendar-rest-api",
-    "version": "1.0.2-alpha",
-    "description": "A simple iCal REST api.",
+    "name": "pixl-tools-rest-api",
+    "version": "1.0.0-alpha",
+    "description": "A simple REST api server for multiple purposes.",
     "scripts": {
         "start": "nodemon dist/server.js",
         "tsc": "tsc"

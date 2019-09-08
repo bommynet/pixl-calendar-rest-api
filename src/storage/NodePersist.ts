@@ -8,7 +8,7 @@ const KEY_CONFIG_FILE = "__config";
 
 class NodePersist {
     public async init(): Promise<CalendarConfig> {
-        await storage.init();
+        await storage.init({dir: "storage/calendar"});
 
         let config: CalendarConfig = { alarmId: 0, anniversaryId: 0, appointmentId: 0 };
         try {

@@ -1,4 +1,4 @@
-import Appointment from "../calendar/entities/Appointment";
+import Appointment from "../entities/Appointment";
 
 export default (app, storage, nextId = 0) => {
     let nextAppointmentId = nextId;

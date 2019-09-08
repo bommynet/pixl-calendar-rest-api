@@ -1,17 +1,17 @@
-This project sets up an simple REST api for iCal calendars.
+This project sets up an simple REST api for multiple tools.
 
-It can be used to:
+## Tool 1: Calendar with iCal support
 
 - [ ] import .ical files
-- [X] export .ical files - endpoint:`GET@/api/calendar/sync`
-- [X] create new anniversaries - endpoint:`POST@/api/calendar/anniversary`
-- [X] read all anniversaries - endpoint:`GET@/api/calendar/anniversary`
-- [X] edit/update anniversaries
-- [X] remove anniversaries
-- [X] create new appointments - endpoint:`POST@/api/calendar/appointment`
-- [X] read all appointments - endpoint:`GET@/api/calendar/appointment`
-- [X] edit/update appointments - endpoint:`POST@/api/calendar/appointment/:id`
-- [X] remove appointments - endpoint:`DELETE@/api/calendar/appointment/:id`
+- [ ] export .ical files - `GET@/api/calendar/sync`
+- [X] create new anniversaries - `POST@/api/calendar/anniversary`
+- [X] read all anniversaries - `GET@/api/calendar/anniversary`
+- [X] edit/update anniversaries - `POST@/api/calendar/anniversary`
+- [X] remove anniversaries - `DELETE@/api/calendar/anniversary`
+- [X] create new appointments - `POST@/api/calendar/appointment`
+- [X] read all appointments - `GET@/api/calendar/appointment`
+- [X] edit/update appointments - `POST@/api/calendar/appointment/:id`
+- [X] remove appointments - `DELETE@/api/calendar/appointment/:id`
 - [ ] create and add alarms to appointments/anniversaries
 - [ ] read all alarms of an appointment/anniversary
 - [ ] edit/update alarms of an appointment/anniversary

@@ -1,4 +1,4 @@
-import Anniversary from "../calendar/entities/Anniversary";
+import Anniversary from "../entities/Anniversary";
 
 export default (app, storage, nextId = 0) => {
     let nextAnniversaryId = nextId;

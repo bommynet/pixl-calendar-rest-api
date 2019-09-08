@@ -4,3 +4,4 @@ node_modules/
 
 # node-persist::storage
 .node-persist/
+storage/[a-zA-Z]*

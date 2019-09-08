@@ -3,8 +3,8 @@ import bodyParser from "body-parser";
 
 import Storage from "./storage/NodePersist";
 
-import appointments from "./routes/appointment";
-import anniversaries from "./routes/anniversary";
+import appointments from "./calendar/routes/appointment";
+import anniversaries from "./calendar/routes/anniversary";
 
 // import Calendar from "./calendar/Calendar";
 // import { calendarToICal } from "./calendar/parser/entityToICal";
@@ -44,11 +44,13 @@ storage
         return config;
     })
     .then((config) => {
+        // add routes to listen to
         appointments(app, storage, config.appointmentId);
         anniversaries(app, storage, config.anniversaryId);
         console.log("Routes ready");
     })
     .then(() => {
+        // start http server on given port
         app.listen(port, () => console.log(`Application started at ${port}`));
     })
     .catch(console.error);
