@@ -1,5 +1,5 @@
 {
-    "name": "pixl-tools-rest-api",
+    "name": "pixl-rest-api-server",
     "version": "1.0.0-alpha",
     "description": "A simple REST api server for multiple purposes.",
     "scripts": {
