@@ -1,18 +1,24 @@
 import storage from "node-persist";
-import { CalendarConfig } from "../types";
-import Appointment from "../calendar/entities/Appointment";
-import Anniversary from "../calendar/entities/Anniversary";
-import Alarm from "../calendar/entities/Alarm";
+import { CalendarConfig } from "../../types";
+import Appointment from "../entities/Appointment";
+import Anniversary from "../entities/Anniversary";
+import Alarm from "../entities/Alarm";
 
 const KEY_CONFIG_FILE = "__config";
 
 class NodePersist {
+    private _storage;
+
+    public constructor() {
+        this._storage = storage.create({ dir: "storage/calendar" });
+    }
+
     public async init(): Promise<CalendarConfig> {
-        await storage.init({dir: "storage/calendar"});
+        await this._storage.init();
 
         let config: CalendarConfig = { alarmId: 0, anniversaryId: 0, appointmentId: 0 };
         try {
-            config = await storage.get(KEY_CONFIG_FILE);
+            config = await this._storage.get(KEY_CONFIG_FILE);
         } catch (e) {
             // nothing to do here
             console.log("config file does not exists - use default values");
@@ -30,7 +36,7 @@ class NodePersist {
 
         // load existing config
         try {
-            _config = await storage.get(KEY_CONFIG_FILE);
+            _config = await this._storage.get(KEY_CONFIG_FILE);
         } catch (error) {
             _config = { alarmId: 0, anniversaryId: 0, appointmentId: 0 };
         }
@@ -42,35 +48,35 @@ class NodePersist {
         if (config.anniversaryId) _config.anniversaryId = config.anniversaryId;
         if (config.appointmentId) _config.appointmentId = config.appointmentId;
 
-        return await storage.set(KEY_CONFIG_FILE, _config);
+        return await this._storage.set(KEY_CONFIG_FILE, _config);
     }
 
     public async store(entity: any): Promise<void> {
         if (typeof entity["longId"] === "undefined") throw new TypeError("entities without 'longId' are not storable");
 
-        return await storage.set(entity["longId"], entity);
+        return await this._storage.set(entity["longId"], entity);
     }
 
     public async delete(entity: any): Promise<void> {
         if (typeof entity["longId"] === "undefined") throw new TypeError("entities without 'longId' are not deletable");
 
-        return await storage.del(entity["longId"]);
+        return await this._storage.del(entity["longId"]);
     }
 
     public async read(id: string): Promise<any> {
-        return await storage.get(id);
+        return await this._storage.get(id);
     }
 
     public async loadAllAlarms(): Promise<Alarm[]> {
-        return await storage.valuesWithKeyMatch(/alarm/);
+        return await this._storage.valuesWithKeyMatch(/alarm/);
     }
 
     public async loadAllAppointments(): Promise<Appointment[]> {
-        return await storage.valuesWithKeyMatch(/appointment/);
+        return await this._storage.valuesWithKeyMatch(/appointment/);
     }
 
     public async loadAllAnniversaries(): Promise<Anniversary[]> {
-        return await storage.valuesWithKeyMatch(/anniversary/);
+        return await this._storage.valuesWithKeyMatch(/anniversary/);
     }
 }
 
