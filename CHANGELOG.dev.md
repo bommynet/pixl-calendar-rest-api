@@ -2,6 +2,7 @@
 
 ## 2019-09-09 - 1.0.1-alpha
 
+* Replaced old `calendar`-implementation with new factory style.
 * Created new endpoint for `calendar`, using new factories.
 * Created factories for `routes` and `storage`, to reduce duplicated code.
 

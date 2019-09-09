@@ -1,7 +1,7 @@
 import express from "express";
 import bodyParser from "body-parser";
 
-import setupCalendar from "./calendar";
+import setupCalendar from "./endpoints/calendar";
 import setupProgress from "./progress";
 
 // prepare globals
