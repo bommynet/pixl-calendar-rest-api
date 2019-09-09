@@ -1,6 +1,6 @@
 {
     "name": "pixl-rest-api-server",
-    "version": "1.0.0-alpha",
+    "version": "1.0.1-alpha",
     "description": "A simple REST api server for multiple purposes.",
     "scripts": {
         "start": "nodemon dist/server.js",
