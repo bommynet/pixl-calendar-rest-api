@@ -31,7 +31,7 @@ export default async (app, storage, category, endpoint, factory): Promise<void> 
         console.log("read all:", endpoint);
 
         storage
-            .loadAll()
+            .readAll()
             .then((entries) => res.status(200).send(entries))
             .catch((error) => res.status(500).send(error));
     });
@@ -66,6 +66,7 @@ export default async (app, storage, category, endpoint, factory): Promise<void> 
 
         try {
             entry = factory(nextEntryId, req.body);
+            console.log(entry)
             nextEntryId++;
             await storage.updateConfig({ nextEntryId });
         } catch (reason) {
@@ -104,6 +105,8 @@ export default async (app, storage, category, endpoint, factory): Promise<void> 
             const updatedData = {
                 ...loadedData,
                 ...newData,
+                sequence: Number.parseInt(loadedData.sequence) + 1,
+                lastModifiedDate: new Date().toISOString(),
             };
 
             await storage.store(updatedData);
@@ -127,18 +130,18 @@ export default async (app, storage, category, endpoint, factory): Promise<void> 
     app.delete(`${apiEndpoint}/:id`, async (req, res) => {
         const longId = toLongId(req.params["id"]);
 
-        console.log("update:", endpoint, longId);
+        console.log("delete:", endpoint, longId);
 
         let responseState = 403;
         let responseData: any;
 
         try {
-            const anniversary = await storage.delete(longId);
+            const anniversary = await storage.remove(longId);
             responseState = 202;
             responseData = anniversary;
-        } catch (error) {
+        } catch (reason) {
             responseState = 404;
-            responseData = error;
+            responseData = reason.message;
         }
 
         res.status(responseState).send(responseData);

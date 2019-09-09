@@ -42,11 +42,9 @@ export default async (category, endpoint): Promise<any> => {
         return await _storage.valuesWithKeyMatch(`${endpoint}-`);
     }
 
-    async function remove(entity: any): Promise<any> {
-        if (typeof entity["longId"] === "undefined") throw new TypeError("entities without 'longId' are not deletable");
-
-        const deletedEntry = await _storage.get(entity["longId"]);
-        await _storage.del(entity["longId"]);
+    async function remove(longId: string): Promise<any> {
+        const deletedEntry = await _storage.get(longId);
+        await _storage.del(longId);
 
         return deletedEntry;
     }
