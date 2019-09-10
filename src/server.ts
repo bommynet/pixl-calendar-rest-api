@@ -2,7 +2,7 @@ import express from "express";
 import bodyParser from "body-parser";
 
 import setupCalendar from "./endpoints/calendar";
-import setupProgress from "./progress";
+import setupProgress from "./endpoints/progress";
 
 // prepare globals
 const app = express();

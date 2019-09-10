@@ -66,7 +66,7 @@ export default async (app, storage, category, endpoint, factory): Promise<void> 
 
         try {
             entry = factory(nextEntryId, req.body);
-            console.log(entry)
+            console.log(entry);
             nextEntryId++;
             await storage.updateConfig({ nextEntryId });
         } catch (reason) {
@@ -105,7 +105,7 @@ export default async (app, storage, category, endpoint, factory): Promise<void> 
             const updatedData = {
                 ...loadedData,
                 ...newData,
-                sequence: Number.parseInt(loadedData.sequence) + 1,
+                sequence: (loadedData.sequence || 0) + 1,
                 lastModifiedDate: new Date().toISOString(),
             };
 

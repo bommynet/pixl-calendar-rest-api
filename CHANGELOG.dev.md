@@ -1,5 +1,10 @@
 # pixl-rest-api-server
 
+## 2019-09-10 - 1.0.1-alpha
+
+* Replaced old `progress`-implementation with new factory style.
+* Created new endpoint for `progress`, using new factories.
+
 ## 2019-09-09 - 1.0.1-alpha
 
 * Replaced old `calendar`-implementation with new factory style.
