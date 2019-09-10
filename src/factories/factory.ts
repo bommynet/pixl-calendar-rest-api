@@ -1,3 +1,11 @@
+export interface BaseEntry {
+    id: number;
+    longId: string;
+    sequence: number;
+    createdDate: string;
+    lastModifiedDate: string;
+}
+
 export default (endpoint: string, id: number) => ({
     id: id,
     longId: `${endpoint}-${id}`,
