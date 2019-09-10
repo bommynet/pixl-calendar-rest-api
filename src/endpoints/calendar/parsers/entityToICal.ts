@@ -1,10 +1,9 @@
-import Alarm from "../entities/Alarm";
-import Anniversary from "../entities/Anniversary";
-import Appointment from "../entities/Appointment";
+import { AnniversaryEntry } from "../anniversaryFactory";
+import { AppointmentEntry } from "../appointmentFactory";
 
 export function calendarToICal(calendar: {
-    anniversaries: Anniversary[];
-    appointments: Appointment[];
+    anniversaries: AnniversaryEntry[];
+    appointments: AppointmentEntry[];
     name: string;
 }): string {
     var lines: string[] = [
@@ -25,21 +24,21 @@ export function calendarToICal(calendar: {
     return lines.join("\r\n");
 }
 
-export function alarmToICal(alarm: Alarm): string {
-    const lines: string[] = [
-        "BEGIN:VALARM",
-        "X-WR-ALARMUID:" + alarm.id,
-        "UID:" + alarm.id,
-        "TRIGGER:" + alarm.trigger,
-        "DESCRIPTION:" + alarm.description,
-        "ACTION:" + alarm.action,
-        "END:VALARM",
-    ];
+// export function alarmToICal(alarm: Alarm): string {
+//     const lines: string[] = [
+//         "BEGIN:VALARM",
+//         "X-WR-ALARMUID:" + alarm.id,
+//         "UID:" + alarm.id,
+//         "TRIGGER:" + alarm.trigger,
+//         "DESCRIPTION:" + alarm.description,
+//         "ACTION:" + alarm.action,
+//         "END:VALARM",
+//     ];
 
-    return lines.join("\r\n");
-}
+//     return lines.join("\r\n");
+// }
 
-export function anniversaryToICal(anniversary: Anniversary): string {
+export function anniversaryToICal(anniversary: AnniversaryEntry): string {
     const shrunkdate = anniversary.date.substring(0, anniversary.date.indexOf("T"));
 
     const lines: string[] = [
@@ -72,7 +71,7 @@ export function anniversaryToICal(anniversary: Anniversary): string {
     return lines.join("\r\n");
 }
 
-export function appointmentToICal(appointment: Appointment): string {
+export function appointmentToICal(appointment: AppointmentEntry): string {
     const lines: string[] = [
         "BEGIN:VEVENT",
         "TRANSP:TRANSPARENT",

@@ -2,7 +2,8 @@
 
 ## 2019-09-10 - 1.0.1-alpha
 
-* Added mor types for factories.
+* Moved iCal parser to `endpoint/calendar`.
+* Added more types for factories.
 * Replaced old `progress`-implementation with new factory style.
 * Created new endpoint for `progress`, using new factories.
 
