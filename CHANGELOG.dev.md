@@ -2,6 +2,7 @@
 
 ## 2019-09-10 - 1.0.1-alpha
 
+* Removed replaced files.
 * Moved iCal parser to `endpoint/calendar`.
 * Added more types for factories.
 * Replaced old `progress`-implementation with new factory style.
