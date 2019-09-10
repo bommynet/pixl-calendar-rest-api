@@ -146,4 +146,6 @@ export default async (app, storage, category, endpoint, factory): Promise<void> 
 
         res.status(responseState).send(responseData);
     });
+
+    console.log(`route ${apiEndpoint} is ready`);
 };

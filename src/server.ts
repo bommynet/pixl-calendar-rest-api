@@ -18,7 +18,7 @@ app.use(function(req, res, next) {
     next();
 });
 
-// setup storage
+// setup endpoints
 Promise.all([setupCalendar(app), setupProgress(app)])
     .then(() => {
         // start http server on given port

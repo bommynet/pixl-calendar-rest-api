@@ -49,6 +49,8 @@ export default async (category, endpoint): Promise<any> => {
         return deletedEntry;
     }
 
+    console.log(`storage storage/${category}/${endpoint}-* is ready`);
+
     return {
         loadConfig,
         updateConfig,

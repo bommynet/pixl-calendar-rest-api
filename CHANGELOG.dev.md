@@ -2,6 +2,7 @@
 
 ## 2019-09-10 - 1.0.1-alpha
 
+* Re-added startup console output for each endpoint.
 * Removed replaced files.
 * Moved iCal parser to `endpoint/calendar`.
 * Added more types for factories.
